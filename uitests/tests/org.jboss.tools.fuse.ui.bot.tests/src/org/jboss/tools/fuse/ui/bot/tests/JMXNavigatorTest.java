@@ -173,11 +173,11 @@ public class JMXNavigatorTest {
 		FuseJMXNavigator jmx = new FuseJMXNavigator();
 		assertNotNull(
 				"The following path is inaccesible: Local Camel Context/Camel/camelContext-.../Endpoints/file/work/cbr/input",
-				jmx.getNode("Local Camel Context", "Camel", "cbr-example-context", "Endpoints", "file",
+				jmx.getNode("Local Processes", "Local Camel Context", "Camel", "cbr-example-context", "Endpoints", "file",
 						"work/cbr/input"));
 		assertNotNull(
 				"The following path is inaccesible: Local Camel Context/Camel/camelContext-.../Routes/cbr-route/file:work/cbr/input/Log _log1/Choice/Otherwise/Log _log4/file:work/cbr/output/others",
-				jmx.getNode("Local Camel Context", "Camel", "cbr-example-context", "Routes", "cbr-route",
+				jmx.getNode("Local Processes", "Local Camel Context", "Camel", "cbr-example-context", "Routes", "cbr-route",
 						"file:work/cbr/input", "Log _log1", "Choice", "Otherwise", "Log _log4",
 						"file:work/cbr/output/others"));
 		assertTrue("There are some errors in Error Log", LogGrapper.getPluginErrors("fuse").size() == 0);
@@ -208,14 +208,14 @@ public class JMXNavigatorTest {
 		FuseJMXNavigator jmx = new FuseJMXNavigator();
 		jmx.open();
 		assertTrue("Suspension was not performed",
-				jmx.suspendCamelContext("Local Camel Context", "Camel", "cbr-example-context"));
+				jmx.suspendCamelContext("Local Processes", "Local Camel Context", "Camel", "cbr-example-context"));
 		try {
 			new WaitUntil(new ConsoleHasText("Route: cbr-route suspend complete"), TimePeriod.DEFAULT);
 		} catch (WaitTimeoutExpiredException e) {
 			fail("Camel context was not suspended!");
 		}
 		assertTrue("Resume of Camel Context was not performed",
-				jmx.resumeCamelContext("Local Camel Context", "Camel", "cbr-example-context"));
+				jmx.resumeCamelContext("Local Processes", "Local Camel Context", "Camel", "cbr-example-context"));
 		try {
 			new WaitUntil(new ConsoleHasText("Route: cbr-route resumed"), TimePeriod.DEFAULT);
 		} catch (WaitTimeoutExpiredException e) {
