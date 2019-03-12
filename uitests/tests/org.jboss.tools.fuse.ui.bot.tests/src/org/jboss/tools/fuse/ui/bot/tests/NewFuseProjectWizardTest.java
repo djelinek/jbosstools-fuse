@@ -26,18 +26,28 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import org.eclipse.reddeer.common.condition.WaitCondition;
+import org.eclipse.reddeer.common.wait.TimePeriod;
+import org.eclipse.reddeer.common.wait.WaitUntil;
+import org.eclipse.reddeer.common.wait.WaitWhile;
 import org.eclipse.reddeer.direct.project.Project;
 import org.eclipse.reddeer.eclipse.ui.views.log.LogView;
 import org.eclipse.reddeer.eclipse.ui.views.markers.ProblemsView;
 import org.eclipse.reddeer.junit.runner.RedDeerSuite;
 import org.eclipse.reddeer.swt.api.TreeItem;
+import org.eclipse.reddeer.swt.condition.ShellIsAvailable;
+import org.eclipse.reddeer.swt.impl.button.OkButton;
+import org.eclipse.reddeer.swt.impl.shell.DefaultShell;
 import org.eclipse.reddeer.swt.impl.tree.DefaultTree;
+import org.eclipse.reddeer.workbench.core.condition.JobIsRunning;
 import org.eclipse.reddeer.workbench.handler.WorkbenchShellHandler;
+import org.eclipse.reddeer.workbench.ui.dialogs.WorkbenchPreferenceDialog;
 import org.jboss.tools.fuse.reddeer.FileUtils;
 import org.jboss.tools.fuse.reddeer.LogGrapper;
 import org.jboss.tools.fuse.reddeer.ResourceHelper;
 import org.jboss.tools.fuse.reddeer.SupportedCamelVersions;
 import org.jboss.tools.fuse.reddeer.dialog.WhereToFindMoreTemplatesMessageDialog;
+import org.jboss.tools.fuse.reddeer.preference.InstalledJREs;
 import org.jboss.tools.fuse.reddeer.utils.LogChecker;
 import org.jboss.tools.fuse.reddeer.utils.ProjectFactory;
 import org.jboss.tools.fuse.reddeer.wizard.NewFuseIntegrationProjectWizard;
@@ -55,6 +65,8 @@ import org.junit.runner.RunWith;
  */
 @RunWith(RedDeerSuite.class)
 public class NewFuseProjectWizardTest {
+	
+	public static final String JDK_WARNING_MESSAGE = "No Strictly compliant JRE detected";
 
 	/**
 	 * Prepares test environment
@@ -83,6 +95,7 @@ public class NewFuseProjectWizardTest {
 	 */
 	@Test
 	public void testDifferentWorkspaceLocation() {
+		boolean hasJava8 = hasJava8Available();
 		File targetLocation = new File(
 				ResourceHelper.getResourceAbsolutePath(Activator.PLUGIN_ID, "resources/projects") + "/test");
 		NewFuseIntegrationProjectWizard wiz = new NewFuseIntegrationProjectWizard();
@@ -98,6 +111,7 @@ public class NewFuseProjectWizardTest {
 		NewFuseIntegrationProjectWizardAdvancedPage lastPage = new NewFuseIntegrationProjectWizardAdvancedPage(wiz);
 		lastPage.selectTemplate(SPRINGBOOT);
 		wiz.finish();
+		waitFinish(hasJava8);
 		File actualLocation = new File(Project.getLocation("test"));
 		assertEquals("Location of a project is different!", targetLocation, actualLocation);
 		assertTrue("There are some errors in Error Log", LogGrapper.getPluginErrors("fuse").size() == 0);
@@ -120,6 +134,7 @@ public class NewFuseProjectWizardTest {
 	 */
 	@Test
 	public void testCamelVersion() {
+		boolean hasJava8 = hasJava8Available();
 		NewFuseIntegrationProjectWizard wiz = new NewFuseIntegrationProjectWizard();
 		wiz.open();
 		NewFuseIntegrationProjectWizardFirstPage firstPage = new NewFuseIntegrationProjectWizardFirstPage(wiz);
@@ -133,6 +148,7 @@ public class NewFuseProjectWizardTest {
 		NewFuseIntegrationProjectWizardAdvancedPage lastPage = new NewFuseIntegrationProjectWizardAdvancedPage(wiz);
 		lastPage.selectTemplate(EMPTY_BLUEPRINT);
 		wiz.finish();
+		waitFinish(hasJava8);
 		assertFalse("Project was created with errors", hasErrors());
 		assertTrue("There are some errors in Error Log", LogGrapper.getPluginErrors("fuse").size() == 0);
 		try {
@@ -215,8 +231,10 @@ public class NewFuseProjectWizardTest {
 		NewFuseIntegrationProjectWizardAdvancedPage lastPage = new NewFuseIntegrationProjectWizardAdvancedPage(wiz);
 		lastPage.selectMoreExamplesLink();
 		WhereToFindMoreTemplatesMessageDialog moreExamplesDialog = new WhereToFindMoreTemplatesMessageDialog();
+		new WaitUntil(new ShellIsAvailable(moreExamplesDialog), TimePeriod.MEDIUM);
 		assertThat(moreExamplesDialog.getMessage()).contains("https://github.com/apache/camel/tree/master/examples",
 				"https://github.com/fabric8-quickstarts");
+		moreExamplesDialog.close();
 		wiz.cancel();
 		LogChecker.assertNoFuseError();
 	}
@@ -229,5 +247,29 @@ public class NewFuseProjectWizardTest {
 				return true;
 		}
 		return false;
+	}
+	
+	private void waitFinish(boolean hasJava8) {
+		if(!hasJava8) {
+			DefaultShell warningMessage = new DefaultShell(JDK_WARNING_MESSAGE);
+			WaitCondition wait = new ShellIsAvailable(warningMessage);
+			new WaitUntil(wait, TimePeriod.getCustom(900), false);
+			if (wait.getResult() != null) {
+				new OkButton(warningMessage).click();
+			}
+		}
+		
+		new WaitWhile(new JobIsRunning(), TimePeriod.LONG);
+		new WaitWhile(new ShellIsAvailable("New Fuse Integration Project"), TimePeriod.getCustom(900));
+	}
+	
+	private boolean hasJava8Available() {
+		WorkbenchPreferenceDialog prefs = new WorkbenchPreferenceDialog();
+		InstalledJREs jres = new InstalledJREs(prefs); 
+		prefs.open();
+		prefs.select(jres);
+		boolean hasJava8 = jres.containsJreWithName("Java\\s*SE.*8.*") || jres.containsJreWithName(".*jdk.*8.*");
+		prefs.ok();	
+		return hasJava8;
 	}
 }

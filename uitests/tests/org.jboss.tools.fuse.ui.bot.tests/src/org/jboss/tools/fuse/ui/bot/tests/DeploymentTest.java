@@ -14,8 +14,9 @@ import static org.eclipse.reddeer.requirements.server.ServerRequirementState.RUN
 import static org.jboss.tools.fuse.reddeer.wizard.NewFuseIntegrationProjectWizardDeploymentType.STANDALONE;
 import static org.jboss.tools.fuse.reddeer.wizard.NewFuseIntegrationProjectWizardRuntimeType.EAP;
 import static org.jboss.tools.fuse.reddeer.wizard.NewFuseIntegrationProjectWizardRuntimeType.KARAF;
-import static org.junit.Assert.assertFalse;
+//import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.hamcrest.CoreMatchers.equalTo;
 import static org.jboss.tools.fuse.ui.bot.tests.Activator.PLUGIN_ID;
 
 import java.io.File;
@@ -56,7 +57,9 @@ import org.jboss.tools.fuse.reddeer.wizard.NewFuseIntegrationProjectWizardRuntim
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ErrorCollector;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized.Parameters;
 import org.junit.runners.Parameterized.UseParametersRunnerFactory;
@@ -190,6 +193,9 @@ public class DeploymentTest {
 		FuseServerManipulator.stopServer(serverName);
 		FuseServerManipulator.removeServer(serverName);
 	}
+	
+	@Rule
+	public ErrorCollector collector = new ErrorCollector();
 
 	/**
 	 * <p>
@@ -238,7 +244,8 @@ public class DeploymentTest {
 
 		// deploy project (add module...)
 		FuseServerManipulator.addModule(serverName, PROJECT_NAME);
-		assertTrue(FuseServerManipulator.hasServerModule(serverName, PROJECT_NAME));
+		collector.checkThat("Deploy project module failed!", FuseServerManipulator.hasServerModule(serverName, PROJECT_NAME), equalTo(true));
+//		assertTrue(FuseServerManipulator.hasServerModule(serverName, PROJECT_NAME));
 
 		// check deployed
 		switch (RUNTIME_TYPE) {
@@ -251,11 +258,13 @@ public class DeploymentTest {
 		}
 
 		// check error log for Fuse errors
-		LogChecker.assertNoFuseError();
+		collector.checkThat("Console contains some 'fuse' errors!", LogChecker.noFuseError(), equalTo(true));
+//		LogChecker.assertNoFuseError();
 
 		// undeploy project (remove module...)
 		FuseServerManipulator.removeAllModules(serverName);
-		assertFalse(FuseServerManipulator.hasServerModule(serverName, PROJECT_NAME));
+		collector.checkThat("Undeploy project module failed!", FuseServerManipulator.hasServerModule(serverName, PROJECT_NAME), equalTo(false));
+//		assertFalse(FuseServerManipulator.hasServerModule(serverName, PROJECT_NAME));
 
 		// check undeployed
 		switch (RUNTIME_TYPE) {
@@ -268,7 +277,8 @@ public class DeploymentTest {
 		}
 
 		// check error log for Fuse errors
-		LogChecker.assertNoFuseError();
+		collector.checkThat("Console contains some 'fuse' errors!", LogChecker.noFuseError(), equalTo(true));
+//		LogChecker.assertNoFuseError();
 	}
 
 	private void assertEAP(String consoleMessage, String browserMessage) {
@@ -276,29 +286,40 @@ public class DeploymentTest {
 		WebBrowserView browser = new WebBrowserView();
 		browser.open();
 		browser.openPageURL(BROWSER_URL);
-		assertTrue(browser.getText().contains(browserMessage));
+//		collector.checkThat("EAP project errors!", browser.getText().contains(browserMessage), equalTo(true));
+		assertTrue("EAP project errors!", browser.getText().contains(browserMessage));
 	}
 
 	private void assertKaraf(String message, DeploymentStatus status) {
 		if (status == DeploymentStatus.DEPLOY) {
 			if (isActiveMQ()) {
-				assertTrue(message, new FuseShellSSH().containsLog(PROJECT_IS_DEPLOYED_ACTIVEMQ));
+				collector.checkThat(message, new FuseShellSSH().containsLog(PROJECT_IS_DEPLOYED_ACTIVEMQ), equalTo(true));
+//				assertTrue(message, new FuseShellSSH().containsLog(PROJECT_IS_DEPLOYED_ACTIVEMQ));
 			} else {
-				assertTrue(message,
-						new FuseShellSSH().containsLog(
-								serverRequirement.getConfiguration().getServer().getVersion().startsWith("7")
-										? PROJECT_IS_DEPLOYED
-										: PROJECT_IS_DEPLOYED_OLD));
+				collector.checkThat(message, new FuseShellSSH().containsLog(
+						serverRequirement.getConfiguration().getServer().getVersion().startsWith("7")
+						? PROJECT_IS_DEPLOYED
+						: PROJECT_IS_DEPLOYED_OLD), equalTo(true));
+//				assertTrue(message,
+//						new FuseShellSSH().containsLog(
+//								serverRequirement.getConfiguration().getServer().getVersion().startsWith("7")
+//										? PROJECT_IS_DEPLOYED
+//										: PROJECT_IS_DEPLOYED_OLD));
 			}
 		} else {
 			if (isActiveMQ()) {
-				assertTrue(message, new FuseShellSSH().containsLog(PROJECT_IS_UNDEPLOYED_ACTIVEMQ));
+				collector.checkThat(message, new FuseShellSSH().containsLog(PROJECT_IS_UNDEPLOYED_ACTIVEMQ), equalTo(true));
+//				assertTrue(message, new FuseShellSSH().containsLog(PROJECT_IS_UNDEPLOYED_ACTIVEMQ));
 			} else {
-				assertTrue(message,
-						new FuseShellSSH().containsLog(
-								serverRequirement.getConfiguration().getServer().getVersion().startsWith("7")
-										? PROJECT_IS_UNDEPLOYED
-										: PROJECT_IS_UNDEPLOYED_OLD));
+				collector.checkThat(message, new FuseShellSSH().containsLog(
+						serverRequirement.getConfiguration().getServer().getVersion().startsWith("7")
+						? PROJECT_IS_UNDEPLOYED
+						: PROJECT_IS_UNDEPLOYED_OLD), equalTo(true));
+//				assertTrue(message,
+//						new FuseShellSSH().containsLog(
+//								serverRequirement.getConfiguration().getServer().getVersion().startsWith("7")
+//										? PROJECT_IS_UNDEPLOYED
+//										: PROJECT_IS_UNDEPLOYED_OLD));
 			}
 		}
 	}

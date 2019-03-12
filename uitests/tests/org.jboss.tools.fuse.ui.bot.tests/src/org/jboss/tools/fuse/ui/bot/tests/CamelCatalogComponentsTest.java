@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import org.eclipse.reddeer.eclipse.ui.perspectives.JavaEEPerspective;
 import org.eclipse.reddeer.gef.view.PaletteView;
 import org.eclipse.reddeer.junit.internal.runner.ParameterizedRequirementsRunnerFactory;
 import org.eclipse.reddeer.junit.requirement.inject.InjectRequirement;
@@ -124,7 +125,18 @@ public class CamelCatalogComponentsTest {
 				.version(catalogRequirement.getConfiguration().getVersion()).template(CBR_SPRING).create();	
 		catalog = new CamelCatalogUtils(catalogRequirement.getConfiguration().getHome());
 	}
-
+	
+	/**
+	 * Fix 'Advanced tab' bug, component palette could be focused after reopen of Fuse Integration perspective 
+	 
+	@BeforeClass
+	public static void fix() {
+		new PaletteView().open();
+		new JavaEEPerspective().open();
+		new FuseIntegrationPerspective().open();
+	}
+	*/
+	
 	/**
 	 * Cleans up test environment and switch to required tab in camel editor
 	 */

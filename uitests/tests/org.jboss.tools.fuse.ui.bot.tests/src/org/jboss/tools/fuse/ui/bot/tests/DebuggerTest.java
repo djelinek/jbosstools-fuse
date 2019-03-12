@@ -10,7 +10,7 @@
  ******************************************************************************/
 package org.jboss.tools.fuse.ui.bot.tests;
 
-import static org.jboss.tools.fuse.reddeer.SupportedCamelVersions.CAMEL_2_17_0_REDHAT_630187;
+import static org.jboss.tools.fuse.reddeer.SupportedCamelVersions.CAMEL_LATEST;
 import static org.jboss.tools.fuse.reddeer.wizard.NewFuseIntegrationProjectWizardDeploymentType.STANDALONE;
 import static org.jboss.tools.fuse.reddeer.wizard.NewFuseIntegrationProjectWizardRuntimeType.KARAF;
 import static org.junit.Assert.assertEquals;
@@ -75,7 +75,7 @@ public class DebuggerTest extends DefaultTest {
 	public static void setupInitial() {
 
 		ProjectFactory.newProject(PROJECT_NAME).deploymentType(STANDALONE).runtimeType(KARAF)
-				.version(CAMEL_2_17_0_REDHAT_630187).template(ProjectTemplate.CBR_SPRING).create();
+				.version(CAMEL_LATEST).template(ProjectTemplate.CBR_SPRING).create();
 		CamelEditor editor = new CamelEditor(CAMEL_CONTEXT);
 		editor.selectEditPart("file:work/cbr/input");
 		editor.setProperty("Uri *", "file:src/main/data?noop=true");

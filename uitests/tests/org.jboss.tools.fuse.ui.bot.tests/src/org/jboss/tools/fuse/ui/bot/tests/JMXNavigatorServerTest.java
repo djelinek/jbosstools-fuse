@@ -12,7 +12,6 @@ package org.jboss.tools.fuse.ui.bot.tests;
 
 import static org.eclipse.reddeer.requirements.server.ServerRequirementState.RUNNING;
 import static org.jboss.tools.fuse.reddeer.ProjectTemplate.CBR_BLUEPRINT;
-import static org.jboss.tools.fuse.reddeer.SupportedCamelVersions.CAMEL_2_17_0_REDHAT_630187;
 import static org.jboss.tools.fuse.reddeer.wizard.NewFuseIntegrationProjectWizardDeploymentType.STANDALONE;
 import static org.jboss.tools.fuse.reddeer.wizard.NewFuseIntegrationProjectWizardRuntimeType.KARAF;
 import static org.junit.Assert.assertNotNull;
@@ -106,7 +105,7 @@ public class JMXNavigatorServerTest {
 		error.setActivateOnNewEvents(false);
 
 		ProjectFactory.newProject(PROJECT_NAME).deploymentType(STANDALONE).runtimeType(KARAF)
-				.version(CAMEL_2_17_0_REDHAT_630187).template(CBR_BLUEPRINT).create();
+				.version(serverReq.getConfiguration().getCamelVersion()).template(CBR_BLUEPRINT).create();
 		serverName = serverReq.getConfiguration().getServer().getName();
 		FuseServerManipulator.addModule(serverName, PROJECT_NAME);
 
