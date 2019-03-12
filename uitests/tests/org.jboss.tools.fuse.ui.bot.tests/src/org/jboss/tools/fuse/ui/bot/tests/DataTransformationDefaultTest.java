@@ -19,14 +19,21 @@ import static org.jboss.tools.fuse.reddeer.wizard.NewFuseIntegrationProjectWizar
 import java.io.File;
 import java.io.IOException;
 
+import org.eclipse.reddeer.common.condition.WaitCondition;
 import org.eclipse.reddeer.common.wait.TimePeriod;
 import org.eclipse.reddeer.common.wait.WaitUntil;
+import org.eclipse.reddeer.common.wait.WaitWhile;
 import org.eclipse.reddeer.swt.condition.ShellIsAvailable;
+import org.eclipse.reddeer.swt.impl.button.OkButton;
+import org.eclipse.reddeer.swt.impl.shell.DefaultShell;
+import org.eclipse.reddeer.workbench.core.condition.JobIsRunning;
+import org.eclipse.reddeer.workbench.ui.dialogs.WorkbenchPreferenceDialog;
 import org.jboss.tools.fuse.reddeer.FileUtils;
 import org.jboss.tools.fuse.reddeer.ResourceHelper;
 import org.jboss.tools.fuse.reddeer.editor.CamelEditor;
 import org.jboss.tools.fuse.reddeer.editor.DataTransformationEditor;
 import org.jboss.tools.fuse.reddeer.editor.SourceEditor;
+import org.jboss.tools.fuse.reddeer.preference.InstalledJREs;
 import org.jboss.tools.fuse.reddeer.projectexplorer.CamelProject;
 import org.jboss.tools.fuse.reddeer.wizard.NewFuseIntegrationProjectWizard;
 import org.jboss.tools.fuse.reddeer.wizard.NewFuseIntegrationProjectWizardAdvancedPage;
@@ -50,6 +57,7 @@ public class DataTransformationDefaultTest extends DefaultTest {
 	public static final String CAMEL_VERSION = System.getProperty("fuseCamelVersion", "2.17.0.redhat-630343");
 	public static final String DSL = System.getProperty("fuseDSL", "Blueprint");
 	public static final String STAGING_REPOS = System.getProperty("staging.repositories", "false");
+	public static final String JDK_WARNING_MESSAGE = "No Strictly compliant JRE detected";
 
 	protected static final String PROJECT_NAME = "data-transformation-test";
 
@@ -139,6 +147,7 @@ public class DataTransformationDefaultTest extends DefaultTest {
 			runtimeType = KARAF;
 		}
 
+		boolean hasJava8 = hasJava8Available();
 		NewFuseIntegrationProjectWizard wiz = new NewFuseIntegrationProjectWizard();
 		wiz.open();
 		NewFuseIntegrationProjectWizardFirstPage firstPage = new NewFuseIntegrationProjectWizardFirstPage(wiz);
@@ -159,7 +168,19 @@ public class DataTransformationDefaultTest extends DefaultTest {
 		} else {
 			lastPage.selectTemplate(lastPage.getAllAvailableTemplates().get(0));
 		}
-		wiz.finish(TimePeriod.VERY_LONG);
+		wiz.finish();
+		
+		if(!hasJava8) {
+			DefaultShell warningMessage = new DefaultShell(JDK_WARNING_MESSAGE);
+			WaitCondition wait = new ShellIsAvailable(warningMessage);
+			new WaitUntil(wait, TimePeriod.VERY_LONG, false);
+			if (wait.getResult() != null) {
+				new OkButton(warningMessage).click();
+			}
+		}
+		
+		new WaitWhile(new JobIsRunning(), TimePeriod.VERY_LONG);
+		new WaitWhile(new ShellIsAvailable("New Fuse Integration Project"), TimePeriod.getCustom(900));
 	}
 
 	/**
@@ -210,5 +231,15 @@ public class DataTransformationDefaultTest extends DefaultTest {
 		editor.addCamelComponent("Log", "ref:xml2json");
 		editor.setProperty("Log", "Message *", "${body}");
 		editor.close(true);
+	}
+	
+	private boolean hasJava8Available() {
+		WorkbenchPreferenceDialog prefs = new WorkbenchPreferenceDialog();
+		InstalledJREs jres = new InstalledJREs(prefs); 
+		prefs.open();
+		prefs.select(jres);
+		boolean hasJava8 = jres.containsJreWithName("Java\\s*SE.*8.*") || jres.containsJreWithName(".*jdk.*8.*");
+		prefs.ok();	
+		return hasJava8;
 	}
 }

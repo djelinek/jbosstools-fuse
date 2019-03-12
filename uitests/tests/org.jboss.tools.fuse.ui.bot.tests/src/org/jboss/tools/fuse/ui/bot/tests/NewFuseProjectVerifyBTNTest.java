@@ -24,9 +24,10 @@ import org.eclipse.reddeer.requirements.cleanworkspace.CleanWorkspaceRequirement
 import org.eclipse.reddeer.requirements.openperspective.OpenPerspectiveRequirement.OpenPerspective;
 import org.eclipse.reddeer.swt.condition.ControlIsEnabled;
 import org.eclipse.reddeer.swt.impl.button.CancelButton;
-import org.eclipse.reddeer.swt.impl.button.NextButton;
+import org.eclipse.reddeer.swt.impl.button.FinishButton;
 import org.eclipse.reddeer.swt.impl.label.DefaultLabel;
 import org.eclipse.reddeer.swt.impl.toolbar.DefaultToolItem;
+import org.eclipse.reddeer.workbench.core.condition.JobIsRunning;
 import org.eclipse.reddeer.workbench.handler.EditorHandler;
 import org.eclipse.reddeer.workbench.handler.WorkbenchShellHandler;
 import org.eclipse.reddeer.workbench.impl.shell.WorkbenchShell;
@@ -176,6 +177,7 @@ public class NewFuseProjectVerifyBTNTest {
 	 * Verifies 'Finish' and 'Next' buttons availability  
 	 */
 	private void assertButtons() {
+		new WaitUntil(new JobIsRunning(), TimePeriod.MEDIUM, false);
 		assertFalse("Button 'Next' should be disabled", wizard.isNextEnabled());
 		assertFalse("Button 'Finish' should be disabled", wizard.isFinishEnabled());
 	}
@@ -184,14 +186,18 @@ public class NewFuseProjectVerifyBTNTest {
 	 * Wait until 'Finish' button is enabled and click
 	 */
 	private void finish() {
-		new WaitUntil(new ControlIsEnabled(new NextButton(wizard)), TimePeriod.MEDIUM);
+		new WaitUntil(new JobIsRunning(), TimePeriod.MEDIUM, false);
+		new WaitUntil(new ControlIsEnabled(new FinishButton(wizard)), TimePeriod.DEFAULT, false);
+		new CancelButton(wizard).click();
 	}
 	
 	/**
 	 * Wait until 'Cancel' button is enabled and click
 	 */
 	private void cancel() {
-		new WaitUntil(new ControlIsEnabled(new CancelButton(wizard)), TimePeriod.MEDIUM);
+		new WaitUntil(new JobIsRunning(), TimePeriod.MEDIUM, false);
+		new WaitUntil(new ControlIsEnabled(new CancelButton(wizard)), TimePeriod.DEFAULT, false);
+		new CancelButton(wizard).click();
 	}
 	
 	private void waiting() {
