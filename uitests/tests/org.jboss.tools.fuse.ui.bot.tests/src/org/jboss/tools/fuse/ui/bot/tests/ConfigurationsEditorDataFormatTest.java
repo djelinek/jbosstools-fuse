@@ -11,7 +11,7 @@
 package org.jboss.tools.fuse.ui.bot.tests;
 
 import static org.jboss.tools.fuse.reddeer.ProjectTemplate.CBR_SPRING;
-import static org.jboss.tools.fuse.reddeer.SupportedCamelVersions.CAMEL_2_17_0_REDHAT_630187;
+import static org.jboss.tools.fuse.reddeer.SupportedCamelVersions.CAMEL_LATEST;
 import static org.jboss.tools.fuse.reddeer.wizard.NewFuseIntegrationProjectWizardDeploymentType.STANDALONE;
 import static org.jboss.tools.fuse.reddeer.wizard.NewFuseIntegrationProjectWizardRuntimeType.KARAF;
 import static org.junit.Assert.assertTrue;
@@ -266,7 +266,7 @@ public class ConfigurationsEditorDataFormatTest {
 
 	private static void createProject() {
 		ProjectFactory.newProject(PROJECT_NAME).deploymentType(STANDALONE).runtimeType(KARAF)
-				.version(CAMEL_2_17_0_REDHAT_630187).template(CBR_SPRING).create();
+				.version(CAMEL_LATEST).template(CBR_SPRING).create();
 	}
 
 	private void createDataFormat() {
