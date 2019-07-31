@@ -173,14 +173,14 @@ public class DataTransformationDefaultTest extends DefaultTest {
 		if(!hasJava8) {
 			DefaultShell warningMessage = new DefaultShell(JDK_WARNING_MESSAGE);
 			WaitCondition wait = new ShellIsAvailable(warningMessage);
-			new WaitUntil(wait, TimePeriod.VERY_LONG, false);
+			new WaitUntil(wait, TimePeriod.getCustom(1200), false);
 			if (wait.getResult() != null) {
 				new OkButton(warningMessage).click();
 			}
 		}
 		
 		new WaitWhile(new JobIsRunning(), TimePeriod.VERY_LONG);
-		new WaitWhile(new ShellIsAvailable("New Fuse Integration Project"), TimePeriod.getCustom(900));
+		new WaitWhile(new ShellIsAvailable("New Fuse Integration Project"), TimePeriod.getCustom(1200));
 	}
 
 	/**
