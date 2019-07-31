@@ -31,9 +31,10 @@ import org.eclipse.reddeer.common.wait.TimePeriod;
 import org.eclipse.reddeer.common.wait.WaitUntil;
 import org.eclipse.reddeer.common.wait.WaitWhile;
 import org.eclipse.reddeer.direct.project.Project;
-import org.eclipse.reddeer.eclipse.ui.views.log.LogView;
 import org.eclipse.reddeer.eclipse.ui.views.markers.ProblemsView;
 import org.eclipse.reddeer.junit.runner.RedDeerSuite;
+import org.eclipse.reddeer.requirements.cleanerrorlog.CleanErrorLogRequirement;
+import org.eclipse.reddeer.requirements.cleanworkspace.CleanWorkspaceRequirement;
 import org.eclipse.reddeer.swt.api.TreeItem;
 import org.eclipse.reddeer.swt.condition.ShellIsAvailable;
 import org.eclipse.reddeer.swt.impl.button.OkButton;
@@ -49,7 +50,6 @@ import org.jboss.tools.fuse.reddeer.SupportedCamelVersions;
 import org.jboss.tools.fuse.reddeer.dialog.WhereToFindMoreTemplatesMessageDialog;
 import org.jboss.tools.fuse.reddeer.preference.InstalledJREs;
 import org.jboss.tools.fuse.reddeer.utils.LogChecker;
-import org.jboss.tools.fuse.reddeer.utils.ProjectFactory;
 import org.jboss.tools.fuse.reddeer.wizard.NewFuseIntegrationProjectWizard;
 import org.jboss.tools.fuse.reddeer.wizard.NewFuseIntegrationProjectWizardAdvancedPage;
 import org.jboss.tools.fuse.reddeer.wizard.NewFuseIntegrationProjectWizardFirstPage;
@@ -73,10 +73,8 @@ public class NewFuseProjectWizardTest {
 	 */
 	@After
 	public void setupDeleteProjects() {
-		ProjectFactory.deleteAllProjects();
-		LogView log = new LogView();
-		log.open();
-		log.deleteLog();
+		new CleanErrorLogRequirement().fulfill();
+		new CleanWorkspaceRequirement().fulfill();
 		WorkbenchShellHandler.getInstance().closeAllNonWorbenchShells();
 	}
 
@@ -253,14 +251,14 @@ public class NewFuseProjectWizardTest {
 		if(!hasJava8) {
 			DefaultShell warningMessage = new DefaultShell(JDK_WARNING_MESSAGE);
 			WaitCondition wait = new ShellIsAvailable(warningMessage);
-			new WaitUntil(wait, TimePeriod.getCustom(900), false);
+			new WaitUntil(wait, TimePeriod.getCustom(1200), false);
 			if (wait.getResult() != null) {
 				new OkButton(warningMessage).click();
 			}
 		}
 		
-		new WaitWhile(new JobIsRunning(), TimePeriod.LONG);
-		new WaitWhile(new ShellIsAvailable("New Fuse Integration Project"), TimePeriod.getCustom(900));
+		new WaitWhile(new JobIsRunning(), TimePeriod.VERY_LONG);
+		new WaitWhile(new ShellIsAvailable("New Fuse Integration Project"), TimePeriod.getCustom(1200));
 	}
 	
 	private boolean hasJava8Available() {

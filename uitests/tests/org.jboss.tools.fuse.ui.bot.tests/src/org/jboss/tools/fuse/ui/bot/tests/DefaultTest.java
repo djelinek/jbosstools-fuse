@@ -47,7 +47,6 @@ public class DefaultTest {
 	 */
 	@BeforeClass
 	public static void defaultClassSetup() {
-
 		log.info("Maximizing workbench shell.");
 		new WorkbenchShell().maximize();
 
@@ -65,8 +64,7 @@ public class DefaultTest {
 	 */
 	@Before
 	public void defaultSetup() {
-
-		new WorkbenchShell();
+//		new WorkbenchShell();
 
 		log.info("Deleting Error Log.");
 		new LogView().deleteLog();
@@ -77,8 +75,7 @@ public class DefaultTest {
 	 */
 	@After
 	public void defaultClean() {
-
-		new WorkbenchShell();
+//		new WorkbenchShell();
 
 		log.info("Closing all non workbench shells.");
 		WorkbenchShellHandler.getInstance().closeAllNonWorbenchShells();
@@ -107,8 +104,7 @@ public class DefaultTest {
 	 */
 	@AfterClass
 	public static void defaultFinalClean() {
-
-		new WorkbenchShell();
+//		new WorkbenchShell();
 
 		log.info("Deleting all projects");
 		ProjectFactory.deleteAllProjects();
@@ -124,7 +120,6 @@ public class DefaultTest {
 	 * @return number of error messages from fuse plugins
 	 */
 	protected int getErrorMessages() {
-
 		log.info("Receiving count of errors from fuse plugins");
 		int count = 0;
 		LogView errorLog = new LogView();
@@ -140,7 +135,6 @@ public class DefaultTest {
 	 * Deletes Error Log
 	 */
 	protected void deleteErrorLog() {
-
 		log.info("Deleting error log");
 		LogView errorLog = new LogView();
 		errorLog.deleteLog();
