@@ -126,7 +126,7 @@ public class ProjectFactory {
 		if(!hasJava8) {
 			DefaultShell warningMessage = new DefaultShell(JDK_WARNING_MESSAGE);
 			WaitCondition wait = new ShellIsAvailable(warningMessage);
-			new WaitUntil(wait, TimePeriod.getCustom(900), false);
+			new WaitUntil(wait, TimePeriod.getCustom(1200), false);
 			if (wait.getResult() != null) {
 				new OkButton(warningMessage).click();
 			}
