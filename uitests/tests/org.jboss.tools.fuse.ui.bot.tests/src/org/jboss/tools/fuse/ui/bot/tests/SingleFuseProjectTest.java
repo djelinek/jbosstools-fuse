@@ -43,6 +43,7 @@ import org.eclipse.reddeer.workbench.impl.shell.WorkbenchShell;
 import org.eclipse.reddeer.workbench.ui.dialogs.WorkbenchPreferenceDialog;
 import org.jboss.tools.fuse.reddeer.ProjectType;
 import org.jboss.tools.fuse.reddeer.editor.CamelEditor;
+import org.jboss.tools.fuse.reddeer.preference.InstalledJREs;
 import org.jboss.tools.fuse.reddeer.preference.StagingRepositoriesPreferencePage;
 import org.jboss.tools.fuse.reddeer.projectexplorer.CamelProject;
 import org.jboss.tools.fuse.reddeer.utils.FuseProjectDefinition;
@@ -284,7 +285,9 @@ public class SingleFuseProjectTest extends DefaultTest {
 							.contains("spring bean - spring dsl") && project.getRuntimeType().equals(EAP)) {
 				return;
 			}
-			assertTrue("Project '" + project + "' cannot be run as Local Camel Context", canBeRun(PROJECT_NAME));
+			if(!issue_3213()) {
+				assertTrue("Project '" + project + "' cannot be run as Local Camel Context", canBeRun(PROJECT_NAME));
+			}
 		}
 
 	}
@@ -305,5 +308,28 @@ public class SingleFuseProjectTest extends DefaultTest {
 			}
 		}		
 		return true;
+	}
+	
+	/**
+	 * Fuse Integration Project - FIS example is not working with JDK 11
+	 * Please see https://issues.jboss.org/browse/FUSETOOLS-3213
+	 * 
+	 * @return true/false
+	 */
+	private boolean issue_3213() {
+		if (!hasJava8Available() && project.getCamelVersion().startsWith("2.18.1") && project.getRuntimeType().getLabel().equals("Spring Boot")) {
+			return false;
+		}
+		return true;
+	}
+	
+	private boolean hasJava8Available() {
+		WorkbenchPreferenceDialog prefs = new WorkbenchPreferenceDialog();
+		InstalledJREs jres = new InstalledJREs(prefs); 
+		prefs.open();
+		prefs.select(jres);
+		boolean hasJava8 = jres.containsJreWithName("Java\\s*SE.*8.*") || jres.containsJreWithName(".*jdk.*8.*");
+		prefs.ok();	
+		return hasJava8;
 	}
 }
