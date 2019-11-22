@@ -32,18 +32,23 @@ import org.eclipse.reddeer.core.exception.CoreLayerException;
 import org.eclipse.reddeer.direct.project.Project;
 import org.eclipse.reddeer.eclipse.condition.ConsoleHasText;
 import org.eclipse.reddeer.eclipse.ui.console.ConsoleView;
+import org.eclipse.reddeer.eclipse.ui.views.log.LogView;
 import org.eclipse.reddeer.junit.runner.RedDeerSuite;
 import org.eclipse.reddeer.requirements.cleanerrorlog.CleanErrorLogRequirement;
 import org.eclipse.reddeer.requirements.cleanworkspace.CleanWorkspaceRequirement;
 import org.eclipse.reddeer.requirements.cleanworkspace.CleanWorkspaceRequirement.CleanWorkspace;
 import org.eclipse.reddeer.requirements.openperspective.OpenPerspectiveRequirement.OpenPerspective;
+import org.eclipse.reddeer.swt.api.TreeItem;
+import org.eclipse.reddeer.swt.impl.menu.ContextMenu;
 import org.eclipse.reddeer.swt.impl.menu.ContextMenuItem;
 import org.eclipse.reddeer.workbench.core.condition.JobIsRunning;
 import org.eclipse.reddeer.workbench.handler.WorkbenchShellHandler;
 import org.eclipse.reddeer.workbench.impl.editor.DefaultEditor;
+import org.eclipse.reddeer.workbench.impl.shell.WorkbenchShell;
 import org.jboss.tools.fuse.reddeer.ProjectTemplate;
 import org.jboss.tools.fuse.reddeer.editor.CamelEditor;
 import org.jboss.tools.fuse.reddeer.perspectives.FuseIntegrationPerspective;
+import org.jboss.tools.fuse.reddeer.preference.ConsolePreferenceUtil;
 import org.jboss.tools.fuse.reddeer.projectexplorer.CamelProject;
 import org.jboss.tools.fuse.reddeer.utils.LogChecker;
 import org.jboss.tools.fuse.reddeer.utils.ProjectFactory;
@@ -53,6 +58,7 @@ import org.jboss.tools.fuse.ui.bot.tests.utils.EditorManipulator;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -71,6 +77,18 @@ public class RouteManipulationTest {
 	/**
 	 * Prepares test environment
 	 */
+	@BeforeClass
+	public static void defaultClassSetup() {
+		new WorkbenchShell().maximize();
+		ConsolePreferenceUtil.setConsoleOpenOnError(false);
+		ConsolePreferenceUtil.setConsoleOpenOnOutput(false);
+		new LogView().open();
+		new LogView().setActivateOnNewEvents(false);
+	}
+	
+	/**
+	 * Prepares test environment
+	 */
 	@Before
 	public void setupCreateAndRunCamelProject() {
 		new CleanErrorLogRequirement().fulfill();
@@ -78,22 +96,24 @@ public class RouteManipulationTest {
 		
 		ProjectFactory.newProject("camel-spring").deploymentType(STANDALONE).runtimeType(KARAF)
 				.version(CAMEL_LATEST).template(ProjectTemplate.CBR_SPRING).create();
+		new CamelProject("camel-spring").update();
 	}
 	
 	@After
-	public void cleanJMXNavigator() {		
-		log.info("Try to terminate a console.");
+	public void setupCleanup() {
 		ConsoleView console = new ConsoleView();
 		console.open();
 		try {
 			console.terminateConsole();
-			new WaitWhile(new JobIsRunning(), TimePeriod.LONG);
+			new WaitWhile(new JobIsRunning(), TimePeriod.VERY_LONG);
 		} catch (CoreLayerException ex) {
-			log.warn("Cannot terminate a console. Perhaps there is no active console.");
 		}
 		
-		log.info("Refreshing JMX Navigator view.");
-		new FuseJMXNavigator().refreshLocalProcesses();
+		try {
+			new DefaultEditor(new RegexMatcher("<connected>Remote CamelContext:.*")).close();
+		} catch (Exception e) {
+			// editor is not opened --> ok
+		}
 	}
 	
 	/**
@@ -144,7 +164,6 @@ public class RouteManipulationTest {
 	 */
 	@Test
 	public void testRemoteRouteEditing() {
-
 		CamelEditor editor = new CamelEditor("camel-context.xml");
 		editor.setProperty("file:work/cbr/input", "Uri *", "file:src/main/data?noop=true");
 		editor.save();
@@ -155,49 +174,51 @@ public class RouteManipulationTest {
 			console.switchConsole(new RegexMatcher(".*Run camel-spring.*"));
 		}
 		new WaitUntil(new ConsoleHasText(console, "cbr-route started and consuming"), TimePeriod.VERY_LONG);
-		AbstractWait.sleep(TimePeriod.DEFAULT);
 
 		FuseJMXNavigator jmx = new FuseJMXNavigator();
+		jmx.refreshLocalProcesses();
 		jmx.getNode("Local Processes", "Local Camel Context", "Camel");
-		AbstractWait.sleep(TimePeriod.DEFAULT);
 		assertNotNull(jmx.getNode("Local Processes", "Local Camel Context", "Camel", "cbr-example-context", "Routes",
 				"cbr-route", "file:src/main/data?noop=true", "Log _log1", "Choice", "Log _log5"));
-		jmx.getNode("Local Processes", "Local Camel Context", "Camel", "cbr-example-context").select();
-		new ContextMenuItem("Edit Routes").select();
+		TreeItem jmxNode = jmx.getNode("Local Processes", "Local Camel Context", "Camel", "cbr-example-context");
+		jmxNode.select();
+		new ContextMenu(jmxNode).getItem("Edit Routes").select();
+		
 		editor = new CamelEditor(new DefaultEditor(new RegexMatcher("<connected>Remote CamelContext:.*")).getTitle());
 		assertTrue(editor.isComponentAvailable("Log _log1"));
+		
 		editor.selectEditPart("Route cbr-route");
-		AbstractWait.sleep(TimePeriod.DEFAULT);
+		AbstractWait.sleep(TimePeriod.MEDIUM);
 		editor.selectEditPart("Log _log1");
 		editor.setProperty("Message *", "XXX");
 		editor.save();
 		
-		console.activate();
 		if(console.getConsoleLabel().contains("Camel LSP")) {
 			console.switchConsole(new RegexMatcher(".*Run camel-spring.*"));
 		}
 		new WaitUntil(new ConsoleHasText(console,
 				"Route: cbr-route is stopped, was consuming from: Endpoint[file://src/main/data?noop=true]"), TimePeriod.VERY_LONG);
-		console.activate();
 		if(console.getConsoleLabel().contains("Camel LSP")) {
 			console.switchConsole(new RegexMatcher(".*Run camel-spring.*"));
 		}
 		new WaitUntil(new ConsoleHasText(console,
 				"Route: cbr-route started and consuming from: Endpoint[file://src/main/data?noop=true]"), TimePeriod.VERY_LONG);
-		console.activate();
 		if(console.getConsoleLabel().contains("Camel LSP")) {
 			console.switchConsole(new RegexMatcher(".*Run camel-spring.*"));
 		}
-		new WaitUntil(new ConsoleHasText(console,"INFO  XXX"), TimePeriod.VERY_LONG);
+		new WaitUntil(new ConsoleHasText(console,"INFO  XXX"), TimePeriod.getCustom(600));
+		
 		editor.activate();
 		CamelEditor.switchTab("Source");
 		EditorManipulator.copyFileContentToCamelXMLEditor("resources/camel-context-route-edit.xml");
 		CamelEditor.switchTab("Design");
-		console.activate();
+		jmx.refreshLocalProcesses();
+		
 		if(console.getConsoleLabel().contains("Camel LSP")) {
 			console.switchConsole(new RegexMatcher(".*Run camel-spring.*"));
 		}
-		new WaitUntil(new ConsoleHasText(console,"INFO  YYY"), TimePeriod.VERY_LONG);
+		new WaitUntil(new ConsoleHasText(console,"INFO  YYY"), TimePeriod.getCustom(600));
+		
 		jmx.activate();
 		assertNotNull(jmx.getNode("Local Processes", "Local Camel Context", "Camel", "cbr-example-context", "Routes",
 				"cbr-route", "file:src/main/data?noop=true", "Log _log1", "Choice",
@@ -234,17 +255,15 @@ public class RouteManipulationTest {
 	 */
 	@Test
 	public void testTracing() throws IOException {
-
 		ConsoleView console = new ConsoleView();
 		new CamelProject("camel-spring").runCamelContextWithoutTests("camel-context.xml");
-		console.activate();
 		if(console.getConsoleLabel().contains("Camel LSP")) {
 			console.switchConsole(new RegexMatcher(".*Run camel-spring.*"));
 		}
 		new WaitUntil(new ConsoleHasText("cbr-route started and consuming"), TimePeriod.VERY_LONG);
-		AbstractWait.sleep(TimePeriod.DEFAULT);
 
 		FuseJMXNavigator jmx = new FuseJMXNavigator();
+		jmx.refreshLocalProcesses();
 		jmx.getNode("Local Processes", "Local Camel Context", "Camel", "cbr-example-context").select();
 		new ContextMenuItem("Start Tracing").select();
 		AbstractWait.sleep(TimePeriod.MEDIUM);
@@ -256,7 +275,6 @@ public class RouteManipulationTest {
 		String location = Project.getLocation("camel-spring");
 		Files.copy(new File(location + "/src/main/data/order1.xml").toPath(),
 				new File(location + "/work/cbr/input/order1.xml").toPath());
-		console.activate();
 		if(console.getConsoleLabel().contains("Camel LSP")) {
 			console.switchConsole(new RegexMatcher(".*Run camel-spring.*"));
 		}
