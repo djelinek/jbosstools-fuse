@@ -318,9 +318,9 @@ public class SingleFuseProjectTest extends DefaultTest {
 	 */
 	private boolean issue_3213() {
 		if (!hasJava8Available() && project.getCamelVersion().startsWith("2.18.1") && project.getRuntimeType().getLabel().equals("Spring Boot")) {
-			return false;
+			return true;
 		}
-		return true;
+		return false;
 	}
 	
 	private boolean hasJava8Available() {
