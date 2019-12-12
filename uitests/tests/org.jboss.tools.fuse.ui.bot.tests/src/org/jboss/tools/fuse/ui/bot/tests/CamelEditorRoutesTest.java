@@ -88,16 +88,13 @@ public class CamelEditorRoutesTest {
 		new WorkbenchShell();
 		switch (type) {
 		case SPRING:
-			ProjectFactory.newProject(PROJECT_NAME).deploymentType(STANDALONE).runtimeType(KARAF).template(EMPTY_SPRING)
-					.create();
+			ProjectFactory.newProject(PROJECT_NAME).deploymentType(STANDALONE).runtimeType(KARAF).template(EMPTY_SPRING).create();
 			break;
 		case BLUEPRINT:
-			ProjectFactory.newProject(PROJECT_NAME).deploymentType(STANDALONE).runtimeType(KARAF)
-					.template(EMPTY_BLUEPRINT).create();
+			ProjectFactory.newProject(PROJECT_NAME).deploymentType(STANDALONE).runtimeType(KARAF).template(EMPTY_BLUEPRINT).create();
 			break;
 		default:
-			ProjectFactory.newProject(PROJECT_NAME).deploymentType(STANDALONE).runtimeType(KARAF).template(EMPTY_JAVA)
-					.create();
+			ProjectFactory.newProject(PROJECT_NAME).deploymentType(STANDALONE).runtimeType(KARAF).template(EMPTY_JAVA).create();
 		}
 		LogView errorLog = new LogView();
 		errorLog.open();
