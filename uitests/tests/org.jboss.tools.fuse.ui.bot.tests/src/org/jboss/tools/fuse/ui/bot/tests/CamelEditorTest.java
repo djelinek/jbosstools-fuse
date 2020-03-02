@@ -80,7 +80,7 @@ public class CamelEditorTest extends DefaultTest {
 	 */
 	@Before
 	public void setupResetCamelContext() {
-		new WorkbenchShell();
+//		new WorkbenchShell();
 		ProjectFactory.newProject(PROJECT_NAME).deploymentType(STANDALONE).runtimeType(KARAF).template(ProjectTemplate.CBR_SPRING).create();
 		LogView view = new LogView();
 		view.open();
@@ -89,7 +89,7 @@ public class CamelEditorTest extends DefaultTest {
 
 	@Before
 	public void setupClosePaletteView() {
-		new WorkbenchShell();
+//		new WorkbenchShell();
 		log.info("Trying to close Palette View (if it's open)");
 		try {
 			new PaletteView().close();
@@ -103,7 +103,7 @@ public class CamelEditorTest extends DefaultTest {
 	 */
 	@After
 	public void setupDeleteProjects() {
-		new WorkbenchShell();
+//		new WorkbenchShell();
 		EditorHandler.getInstance().closeAll(true);
 		ProjectFactory.deleteAllProjects();
 	}

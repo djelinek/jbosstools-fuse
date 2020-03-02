@@ -97,12 +97,12 @@ public class ProjectLocalRunTest extends DefaultTest {
 	 */
 	@Test
 	public void testRunProjectWithPassingTests() {
-		Shell workbenchShell = new WorkbenchShell();
+//		Shell workbenchShell = new WorkbenchShell();
 		log.info("Run a project as Local Camel Context (Project contains a passing test case).");
 		new DefaultEditor("CamelContextXmlTest.java").activate();
 		EditorManipulator.copyFileContent("resources/PassingTest.java");
 		new CamelProject(PROJECT_NAME).runCamelContext();
-		workbenchShell.setFocus();
+//		workbenchShell.setFocus();
 		assertFalse("This build should be successful.", new ConsoleView().getConsoleText().contains("BUILD FAILURE"));
 	}
 
@@ -121,13 +121,13 @@ public class ProjectLocalRunTest extends DefaultTest {
 	 */
 	@Test
 	public void testRunProjectWithFailingTests() {
-		Shell workbenchShell = new WorkbenchShell();
+//		Shell workbenchShell = new WorkbenchShell();
 		log.info("Run a project as Local Camel Context (Project contains a failing test case).");
 		new DefaultEditor("CamelContextXmlTest.java").activate();
 		EditorManipulator.copyFileContent("resources/FailingTest.java");
 		new CamelProject(PROJECT_NAME).runCamelContext();
 		new WaitUntil(new ConsoleHasText("BUILD FAILURE"), TimePeriod.getCustom(300));
-		workbenchShell.setFocus();
+//		workbenchShell.setFocus();
 	}
 
 	/**
@@ -146,12 +146,12 @@ public class ProjectLocalRunTest extends DefaultTest {
 	 */
 	@Test
 	public void testRunProjectWithoutTests() {
-		Shell workbenchShell = new WorkbenchShell();
+//		Shell workbenchShell = new WorkbenchShell();
 		log.info("Run a project as Local Camel Context (without tests).");
 		new DefaultEditor("CamelContextXmlTest.java").activate();
 		EditorManipulator.copyFileContent("resources/FailingTest.java");
 		new CamelProject(PROJECT_NAME).runCamelContextWithoutTests(PROJECT_CAMEL_CONTEXT);
-		workbenchShell.setFocus();
+//		workbenchShell.setFocus();
 		assertFalse("This build should be successful.", new ConsoleView().getConsoleText().contains("BUILD FAILURE"));
 	}
 }

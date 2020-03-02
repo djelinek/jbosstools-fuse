@@ -85,7 +85,7 @@ public class CamelEditorRoutesTest {
 	 */
 	@Before
 	public void createProject() {
-		new WorkbenchShell();
+//		new WorkbenchShell();
 		switch (type) {
 		case SPRING:
 			ProjectFactory.newProject(PROJECT_NAME).deploymentType(STANDALONE).runtimeType(KARAF).template(EMPTY_SPRING)
@@ -102,7 +102,7 @@ public class CamelEditorRoutesTest {
 		errorLog.open();
 		errorLog.deleteLog();
 
-		new WorkbenchShell();
+//		new WorkbenchShell();
 		log.info("Trying to close Palette View (if it's open)");
 		try {
 			new PaletteView().close();
@@ -116,7 +116,7 @@ public class CamelEditorRoutesTest {
 	 */
 	@After
 	public void deleteProjects() {
-		new WorkbenchShell();
+//		new WorkbenchShell();
 		EditorHandler.getInstance().closeAll(true);
 		ProjectFactory.deleteAllProjects();
 	}

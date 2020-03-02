@@ -70,6 +70,7 @@ public class InstalledJREs extends PreferencePage {
 		List<TableItem> jreItems = new DefaultTable().getItems();
 		for (TableItem jreItem : jreItems) {
 			if (jreItem.getText().replace(" (default)", "").matches(jreName)) {
+				System.out.println(jreItem.getText());
 				return true;
 			}
 		}
