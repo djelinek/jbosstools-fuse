@@ -37,6 +37,7 @@ import org.eclipse.reddeer.requirements.cleanerrorlog.CleanErrorLogRequirement;
 import org.eclipse.reddeer.requirements.cleanworkspace.CleanWorkspaceRequirement;
 import org.eclipse.reddeer.swt.api.TreeItem;
 import org.eclipse.reddeer.swt.condition.ShellIsAvailable;
+import org.eclipse.reddeer.swt.impl.button.FinishButton;
 import org.eclipse.reddeer.swt.impl.button.OkButton;
 import org.eclipse.reddeer.swt.impl.shell.DefaultShell;
 import org.eclipse.reddeer.swt.impl.tree.DefaultTree;
@@ -108,7 +109,7 @@ public class NewFuseProjectWizardTest {
 		wiz.next();
 		NewFuseIntegrationProjectWizardAdvancedPage lastPage = new NewFuseIntegrationProjectWizardAdvancedPage(wiz);
 		lastPage.selectTemplate(SPRINGBOOT);
-		wiz.finish();
+		new FinishButton(wiz).click();
 		waitFinish(hasJava8);
 		File actualLocation = new File(Project.getLocation("test"));
 		assertEquals("Location of a project is different!", targetLocation, actualLocation);
@@ -145,7 +146,7 @@ public class NewFuseProjectWizardTest {
 		wiz.next();
 		NewFuseIntegrationProjectWizardAdvancedPage lastPage = new NewFuseIntegrationProjectWizardAdvancedPage(wiz);
 		lastPage.selectTemplate(EMPTY_BLUEPRINT);
-		wiz.finish();
+		new FinishButton(wiz).click();
 		waitFinish(hasJava8);
 		assertFalse("Project was created with errors", hasErrors());
 		assertTrue("There are some errors in Error Log", LogGrapper.getPluginErrors("fuse").size() == 0);
@@ -175,7 +176,6 @@ public class NewFuseProjectWizardTest {
 	 */
 	@Test
 	public void testSupportedCamelVersions() {
-
 		NewFuseIntegrationProjectWizard wiz = new NewFuseIntegrationProjectWizard();
 		wiz.open();
 		NewFuseIntegrationProjectWizardFirstPage firstPage = new NewFuseIntegrationProjectWizardFirstPage(wiz);
@@ -199,7 +199,6 @@ public class NewFuseProjectWizardTest {
 			}
 			fail(build.toString());
 		}
-
 	}
 
 	/**
@@ -238,7 +237,6 @@ public class NewFuseProjectWizardTest {
 	}
 
 	private boolean hasErrors() {
-
 		new ProblemsView().open();
 		for (TreeItem item : new DefaultTree().getItems()) {
 			if (item.getText().toLowerCase().contains("error"))

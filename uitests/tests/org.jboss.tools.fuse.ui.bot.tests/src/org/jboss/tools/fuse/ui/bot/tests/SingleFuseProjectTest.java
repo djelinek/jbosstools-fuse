@@ -303,7 +303,7 @@ public class SingleFuseProjectTest extends DefaultTest {
 		view.open();
 		List<Problem> errors = view.getProblems(ProblemType.ERROR);
 		for (Problem problem : errors) {
-			if(!problem.getType().equals("org.eclipse.lsp4e.diagnostic")) {
+			if(!problem.getType().equals("Language Servers")) {
 				return false;
 			}
 		}		
@@ -328,7 +328,7 @@ public class SingleFuseProjectTest extends DefaultTest {
 		InstalledJREs jres = new InstalledJREs(prefs); 
 		prefs.open();
 		prefs.select(jres);
-		boolean hasJava8 = jres.containsJreWithName("Java\\s*SE.*8.*") || jres.containsJreWithName(".*jdk.*8.*");
+		boolean hasJava8 = jres.containsJreWithName("(Java\\sSE)?(.*jdk)?.*([^a-z])?8([^a-z])?.*(jdk.*)?");
 		prefs.ok();	
 		return hasJava8;
 	}

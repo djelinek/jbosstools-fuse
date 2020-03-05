@@ -17,6 +17,7 @@ import org.eclipse.reddeer.common.condition.WaitCondition;
 import org.eclipse.reddeer.common.wait.AbstractWait;
 import org.eclipse.reddeer.common.wait.TimePeriod;
 import org.eclipse.reddeer.common.wait.WaitUntil;
+import org.eclipse.reddeer.common.wait.WaitWhile;
 import org.eclipse.reddeer.eclipse.condition.ConsoleHasText;
 import org.eclipse.reddeer.eclipse.ui.navigator.resources.ProjectExplorer;
 import org.eclipse.reddeer.eclipse.ui.views.markers.ProblemsView;
@@ -26,6 +27,7 @@ import org.eclipse.reddeer.requirements.cleanerrorlog.CleanErrorLogRequirement;
 import org.eclipse.reddeer.requirements.cleanworkspace.CleanWorkspaceRequirement;
 import org.eclipse.reddeer.requirements.openperspective.OpenPerspectiveRequirement.OpenPerspective;
 import org.eclipse.reddeer.swt.condition.ShellIsAvailable;
+import org.eclipse.reddeer.swt.impl.button.FinishButton;
 import org.eclipse.reddeer.swt.impl.button.OkButton;
 import org.eclipse.reddeer.swt.impl.shell.DefaultShell;
 import org.eclipse.reddeer.workbench.core.condition.JobIsRunning;
@@ -89,7 +91,7 @@ public class NewFuseIgniteProjectTest extends DefaultTest {
 		firstPage.setTextProjectName("CustomStepCamelRoute");
 		AbstractWait.sleep(TimePeriod.SHORT);
 		wizard.next();
-		wizard.finish(TimePeriod.VERY_LONG);
+		new FinishButton(wizard).click();
 		waitUntilJREIsDetected(hasJava8);
 		checkProject("CustomStepCamelRoute");
 	}
@@ -110,6 +112,7 @@ public class NewFuseIgniteProjectTest extends DefaultTest {
 	 */
 	@Test
 	public void testCustomStepJavaRoute() {
+		boolean hasJava8 = hasJava8Available();
 		NewFuseIgniteExtensionProjectWizard wizard = new NewFuseIgniteExtensionProjectWizard();
 		wizard.open();
 		NewFuseIgniteExtensionProjectFirstPage firstPage = new NewFuseIgniteExtensionProjectFirstPage(wizard);
@@ -118,7 +121,7 @@ public class NewFuseIgniteProjectTest extends DefaultTest {
 		NewFuseIgniteExtensionProjectSecondPage secondPage = new NewFuseIgniteExtensionProjectSecondPage(wizard);
 		secondPage.toggleJavaBeanRDB(true);
 		AbstractWait.sleep(TimePeriod.SHORT);
-		wizard.finish(TimePeriod.VERY_LONG);
+		new FinishButton(wizard).click();
 		waitUntilJREIsDetected(hasJava8);
 		checkProject("CustomStepJavaRoute");
 	}
@@ -139,6 +142,7 @@ public class NewFuseIgniteProjectTest extends DefaultTest {
 	 */
 	@Test
 	public void testCustomConnector() {
+		boolean hasJava8 = hasJava8Available();
 		NewFuseIgniteExtensionProjectWizard wizard = new NewFuseIgniteExtensionProjectWizard();
 		wizard.open();
 		NewFuseIgniteExtensionProjectFirstPage firstPage = new NewFuseIgniteExtensionProjectFirstPage(wizard);
@@ -147,7 +151,7 @@ public class NewFuseIgniteProjectTest extends DefaultTest {
 		NewFuseIgniteExtensionProjectSecondPage secondPage = new NewFuseIgniteExtensionProjectSecondPage(wizard);
 		secondPage.toggleCustomConnectorRDB(true);
 		AbstractWait.sleep(TimePeriod.SHORT);
-		wizard.finish(TimePeriod.VERY_LONG);
+		new FinishButton(wizard).click();
 		waitUntilJREIsDetected(hasJava8);
 		checkProject("CustomConnector");
 	}
@@ -162,7 +166,7 @@ public class NewFuseIgniteProjectTest extends DefaultTest {
 		new ProjectExplorer().getProject(name).getResource().runAs("Maven clean verify");
 		WaitCondition wait = new ConsoleHasText("BUILD SUCCESS");
 		new WaitUntil(wait, TimePeriod.VERY_LONG, false);
-		if (wait.getResult() == null && new ConsoleHasText("Failed to execute goal io.syndesis.extension").test()) {
+		if (wait.getResult() == null && new ConsoleHasText("FUSETOOLS-3249").test()) {
 			throw new JiraIssue("FUSETOOLS-3249");
 		}
 	}
@@ -195,5 +199,7 @@ public class NewFuseIgniteProjectTest extends DefaultTest {
 				new OkButton(warningMessage).click();
 			}
 		}
+		new WaitWhile(new JobIsRunning(), TimePeriod.VERY_LONG);
+		new WaitWhile(new ShellIsAvailable(NewFuseIgniteExtensionProjectWizard.SHELL_NAME), TimePeriod.getCustom(1200));
 	}
 }
