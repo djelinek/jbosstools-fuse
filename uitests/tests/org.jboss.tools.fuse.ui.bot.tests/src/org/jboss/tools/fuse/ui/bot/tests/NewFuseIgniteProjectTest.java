@@ -25,14 +25,20 @@ import org.eclipse.reddeer.junit.runner.RedDeerSuite;
 import org.eclipse.reddeer.requirements.cleanerrorlog.CleanErrorLogRequirement;
 import org.eclipse.reddeer.requirements.cleanworkspace.CleanWorkspaceRequirement;
 import org.eclipse.reddeer.requirements.openperspective.OpenPerspectiveRequirement.OpenPerspective;
+import org.eclipse.reddeer.swt.condition.ShellIsAvailable;
+import org.eclipse.reddeer.swt.impl.button.OkButton;
+import org.eclipse.reddeer.swt.impl.shell.DefaultShell;
 import org.eclipse.reddeer.workbench.core.condition.JobIsRunning;
+import org.eclipse.reddeer.workbench.ui.dialogs.WorkbenchPreferenceDialog;
 import org.jboss.tools.fuse.reddeer.JiraIssue;
 import org.jboss.tools.fuse.reddeer.perspectives.FuseIntegrationPerspective;
+import org.jboss.tools.fuse.reddeer.preference.InstalledJREs;
 import org.jboss.tools.fuse.reddeer.projectexplorer.CamelProject;
 import org.jboss.tools.fuse.reddeer.wizard.NewFuseIgniteExtensionProjectFirstPage;
 import org.jboss.tools.fuse.reddeer.wizard.NewFuseIgniteExtensionProjectSecondPage;
 import org.jboss.tools.fuse.reddeer.wizard.NewFuseIgniteExtensionProjectWizard;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -45,6 +51,15 @@ import org.junit.runner.RunWith;
 @OpenPerspective(FuseIntegrationPerspective.class)
 @RunWith(RedDeerSuite.class)
 public class NewFuseIgniteProjectTest extends DefaultTest {
+	
+	public static final String JDK_WARNING_MESSAGE = "No Strictly compliant JRE detected";
+	
+	protected static boolean hasJava8;
+	
+	@BeforeClass
+	public static void jreDetection() {
+		hasJava8 = hasJava8Available();
+	}
 
 	@Before
 	public void setupDeleteProjects() {
@@ -75,6 +90,7 @@ public class NewFuseIgniteProjectTest extends DefaultTest {
 		AbstractWait.sleep(TimePeriod.SHORT);
 		wizard.next();
 		wizard.finish(TimePeriod.VERY_LONG);
+		waitUntilJREIsDetected(hasJava8);
 		checkProject("CustomStepCamelRoute");
 	}
 
@@ -103,6 +119,7 @@ public class NewFuseIgniteProjectTest extends DefaultTest {
 		secondPage.toggleJavaBeanRDB(true);
 		AbstractWait.sleep(TimePeriod.SHORT);
 		wizard.finish(TimePeriod.VERY_LONG);
+		waitUntilJREIsDetected(hasJava8);
 		checkProject("CustomStepJavaRoute");
 	}
 
@@ -131,6 +148,7 @@ public class NewFuseIgniteProjectTest extends DefaultTest {
 		secondPage.toggleCustomConnectorRDB(true);
 		AbstractWait.sleep(TimePeriod.SHORT);
 		wizard.finish(TimePeriod.VERY_LONG);
+		waitUntilJREIsDetected(hasJava8);
 		checkProject("CustomConnector");
 	}
 
@@ -150,12 +168,32 @@ public class NewFuseIgniteProjectTest extends DefaultTest {
 	}
 
 	private boolean hasErrors() {
-
 		ProblemsView view = new ProblemsView();
 		view.open();
 		view.close();
 		AbstractWait.sleep(TimePeriod.getCustom(5));
 		view.open();
 		return !view.getProblems(ProblemType.ERROR).isEmpty();
+	}
+	
+	private static boolean hasJava8Available() {
+		WorkbenchPreferenceDialog prefs = new WorkbenchPreferenceDialog();
+		InstalledJREs jres = new InstalledJREs(prefs); 
+		prefs.open();
+		prefs.select(jres);
+		boolean hasJava8 = jres.containsJreWithName("(Java\\sSE)?(.*jdk)?.*([^a-z])?8([^a-z])?.*(jdk.*)?");
+		prefs.ok();	
+		return hasJava8;
+	}
+	
+	private void waitUntilJREIsDetected(boolean hasJava8) {
+		if(!hasJava8) {
+			DefaultShell warningMessage = new DefaultShell(JDK_WARNING_MESSAGE);
+			WaitCondition wait = new ShellIsAvailable(warningMessage);
+			new WaitUntil(wait, TimePeriod.getCustom(1200), false);
+			if (wait.getResult() != null) {
+				new OkButton(warningMessage).click();
+			}
+		}
 	}
 }
