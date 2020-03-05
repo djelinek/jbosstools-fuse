@@ -24,6 +24,7 @@ import org.eclipse.reddeer.common.wait.TimePeriod;
 import org.eclipse.reddeer.common.wait.WaitUntil;
 import org.eclipse.reddeer.common.wait.WaitWhile;
 import org.eclipse.reddeer.swt.condition.ShellIsAvailable;
+import org.eclipse.reddeer.swt.impl.button.FinishButton;
 import org.eclipse.reddeer.swt.impl.button.OkButton;
 import org.eclipse.reddeer.swt.impl.shell.DefaultShell;
 import org.eclipse.reddeer.workbench.core.condition.JobIsRunning;
@@ -168,7 +169,7 @@ public class DataTransformationDefaultTest extends DefaultTest {
 		} else {
 			lastPage.selectTemplate(lastPage.getAllAvailableTemplates().get(0));
 		}
-		wiz.finish();
+		new FinishButton(wiz).click();
 		
 		if(!hasJava8) {
 			DefaultShell warningMessage = new DefaultShell(JDK_WARNING_MESSAGE);
