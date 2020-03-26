@@ -328,7 +328,7 @@ public class SingleFuseProjectTest extends DefaultTest {
 		InstalledJREs jres = new InstalledJREs(prefs); 
 		prefs.open();
 		prefs.select(jres);
-		boolean hasJava8 = jres.containsJreWithName("(Java\\sSE)?(.*jdk)?.*([^a-z])?8([^a-z])?.*(jdk.*)?");
+		boolean hasJava8 = jres.containsJreWithName(".*(jdk8|jdk-1.8|1.8.0).*");
 		prefs.ok();	
 		return hasJava8;
 	}
