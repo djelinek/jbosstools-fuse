@@ -53,8 +53,8 @@ import org.jboss.tools.fuse.reddeer.wizard.NewFuseTransformationWizard.TypeDefin
  */
 public class DataTransformationDefaultTest extends DefaultTest {
 
-	public static final String DEPLOYMENT_TYPE = System.getProperty("fuseDeploymentType", "OpenShift");
-	public static final String RUNTIME_TYPE = System.getProperty("fuseRuntimeType", "SpringBoot");
+	public static final String DEPLOYMENT_TYPE = System.getProperty("fuseDeploymentType", "Standalone");
+	public static final String RUNTIME_TYPE = System.getProperty("fuseRuntimeType", "Karaf");
 	public static final String CAMEL_VERSION = System.getProperty("fuseCamelVersion", "2.17.0.redhat-630343");
 	public static final String DSL = System.getProperty("fuseDSL", "Blueprint");
 	public static final String STAGING_REPOS = System.getProperty("staging.repositories", "false");
@@ -229,7 +229,7 @@ public class DataTransformationDefaultTest extends DefaultTest {
 		wizard.setJSONTargetFile("xyz-order.json - data-transformation-test/src/data");
 		wizard.finish(TimePeriod.VERY_LONG);
 		editor.activate();
-		editor.addCamelComponent("Log", "ref:xml2json");
+		editor.addCamelComponent("Log", "Route _route1");
 		editor.setProperty("Log", "Message *", "${body}");
 		editor.close(true);
 	}
