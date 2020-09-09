@@ -127,6 +127,14 @@ public class NewFuseIntegrationProjectWizardRuntimePage extends WizardPage {
 		new DefaultCombo(new DefaultGroup(this, CAMEL_VERSION_GROUP_LABEL), 0).setSelection(version);
 	}
 
+	public void pickupCamelVersion(String version) {
+		for (String ver : getAllAvailableCamelVersions()) {
+			if(ver.startsWith(version)) {
+				new DefaultCombo(new DefaultGroup(this, CAMEL_VERSION_GROUP_LABEL), 0).setSelection(ver);
+			}
+		}
+	}
+
 	public void typeCamelVersion(String version) {
 		new DefaultCombo(new DefaultGroup(this, CAMEL_VERSION_GROUP_LABEL), 0).setText(version);
 	}

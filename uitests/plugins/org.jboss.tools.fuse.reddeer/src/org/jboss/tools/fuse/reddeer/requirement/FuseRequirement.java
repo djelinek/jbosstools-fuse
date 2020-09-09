@@ -18,8 +18,11 @@ import java.util.List;
 
 import org.eclipse.reddeer.common.logging.Logger;
 import org.eclipse.reddeer.direct.preferences.Preferences;
+import org.eclipse.reddeer.eclipse.jdt.debug.ui.jres.JREsPreferencePage;
 import org.eclipse.reddeer.junit.requirement.ConfigurableRequirement;
 import org.eclipse.reddeer.requirements.server.ServerRequirementState;
+import org.eclipse.reddeer.workbench.ui.dialogs.WorkbenchPreferenceDialog;
+import org.jboss.tools.fuse.reddeer.preference.InstalledJREs;
 import org.jboss.tools.fuse.reddeer.requirement.FuseRequirement.Fuse;
 import org.jboss.tools.fuse.reddeer.runtime.ServerBase;
 
@@ -56,6 +59,17 @@ public class FuseRequirement implements ConfigurableRequirement<FuseConfiguratio
 
 	@Override
 	public void fulfill() {
+		// Select JDK 8 as default runtime (if is available)
+		WorkbenchPreferenceDialog prefs = new WorkbenchPreferenceDialog();
+		InstalledJREs jres = new InstalledJREs(prefs);
+		prefs.open();
+		prefs.select(jres);
+		String jreName = jres.getJreName(".*(jdk8|jdk-1.8|1.8.0).*");
+		if(jreName != "") {
+			new JREsPreferencePage(prefs).toggleJRE(jreName, true);
+		}
+		prefs.ok();
+
 		ServerBase serverBase = config.getServer();
 		List<String> preferences = serverBase.getProperties("preference");
 		for (String preference : preferences) {

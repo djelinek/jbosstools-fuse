@@ -75,4 +75,20 @@ public class InstalledJREs extends PreferencePage {
 		}
 		return false;
 	}
+
+	/**
+	 * Returns whether the JRE with a given name (if exists).
+	 *
+	 * @param regexName
+	 * @return jreName or empty string
+	 */
+	public String getJreName(String regexName) {
+		List<TableItem> jreItems = new DefaultTable().getItems();
+		for (TableItem jreItem : jreItems) {
+			if (jreItem.getText().replace(" (default)", "").matches(regexName)) {
+				return jreItem.getText().replace(" (default)", "");
+			}
+		}
+		return "";
+	}
 }
