@@ -25,6 +25,7 @@ import org.eclipse.reddeer.eclipse.condition.ConsoleHasText;
 import org.eclipse.reddeer.eclipse.ui.console.ConsoleView;
 import org.eclipse.reddeer.junit.requirement.inject.InjectRequirement;
 import org.eclipse.reddeer.junit.runner.RedDeerSuite;
+import org.eclipse.reddeer.requirements.jre.JRERequirement.JRE;
 import org.jboss.tools.fuse.reddeer.JiraIssue;
 import org.jboss.tools.fuse.reddeer.ResourceHelper;
 import org.jboss.tools.fuse.reddeer.condition.FuseLogContainsText;
@@ -53,6 +54,7 @@ import org.junit.runner.RunWith;
  * @author tsedmik
  */
 @RunWith(RedDeerSuite.class)
+@JRE
 @Fuse(state = RUNNING)
 public class DataTransformationDeploymentTest extends DataTransformationDefaultTest {
 
