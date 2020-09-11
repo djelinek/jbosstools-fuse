@@ -20,7 +20,6 @@ import java.io.File;
 import java.io.IOException;
 
 import org.eclipse.reddeer.common.condition.WaitCondition;
-import org.eclipse.reddeer.common.wait.AbstractWait;
 import org.eclipse.reddeer.common.wait.TimePeriod;
 import org.eclipse.reddeer.common.wait.WaitUntil;
 import org.eclipse.reddeer.common.wait.WaitWhile;
