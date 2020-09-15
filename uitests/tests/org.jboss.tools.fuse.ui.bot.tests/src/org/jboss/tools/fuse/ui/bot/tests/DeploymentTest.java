@@ -35,6 +35,7 @@ import org.eclipse.reddeer.junit.runner.RedDeerSuite;
 import org.eclipse.reddeer.requirements.cleanerrorlog.CleanErrorLogRequirement;
 import org.eclipse.reddeer.requirements.cleanworkspace.CleanWorkspaceRequirement;
 import org.eclipse.reddeer.requirements.cleanworkspace.CleanWorkspaceRequirement.CleanWorkspace;
+import org.eclipse.reddeer.requirements.jre.JRERequirement.JRE;
 import org.eclipse.reddeer.requirements.openperspective.OpenPerspectiveRequirement.OpenPerspective;
 import org.jboss.tools.fuse.reddeer.ProjectType;
 import org.jboss.tools.fuse.reddeer.ResourceHelper;
@@ -76,6 +77,7 @@ import org.junit.runners.Parameterized.UseParametersRunnerFactory;
  */
 @CleanWorkspace
 @RunWith(RedDeerSuite.class)
+@JRE
 @Fuse(state = RUNNING)
 @OpenPerspective(FuseIntegrationPerspective.class)
 @UseParametersRunnerFactory(ParameterizedRequirementsRunnerFactory.class)
