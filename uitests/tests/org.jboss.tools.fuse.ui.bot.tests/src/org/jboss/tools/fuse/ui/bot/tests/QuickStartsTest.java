@@ -29,6 +29,7 @@ import org.eclipse.reddeer.junit.internal.runner.ParameterizedRequirementsRunner
 import org.eclipse.reddeer.junit.requirement.inject.InjectRequirement;
 import org.eclipse.reddeer.junit.runner.RedDeerSuite;
 import org.eclipse.reddeer.requirements.cleanworkspace.CleanWorkspaceRequirement.CleanWorkspace;
+import org.eclipse.reddeer.requirements.jre.JRERequirement.JRE;
 import org.eclipse.reddeer.requirements.openperspective.OpenPerspectiveRequirement.OpenPerspective;
 import org.eclipse.reddeer.workbench.impl.editor.DefaultEditor;
 import org.eclipse.reddeer.workbench.impl.shell.WorkbenchShell;
@@ -58,6 +59,7 @@ import org.junit.runners.Parameterized.UseParametersRunnerFactory;
  */
 @CleanWorkspace
 @RunWith(RedDeerSuite.class)
+@JRE
 @Fuse(state = PRESENT)
 @OpenPerspective(FuseIntegrationPerspective.class)
 @UseParametersRunnerFactory(ParameterizedRequirementsRunnerFactory.class)
