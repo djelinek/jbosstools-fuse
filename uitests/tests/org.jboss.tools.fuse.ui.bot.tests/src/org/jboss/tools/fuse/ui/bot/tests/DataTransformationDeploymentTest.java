@@ -58,7 +58,7 @@ import org.junit.runner.RunWith;
 @Fuse(state = RUNNING)
 public class DataTransformationDeploymentTest extends DataTransformationDefaultTest {
 
-	public static final String EXAMPLE_KARAF_RUNTIME_PATH = "/src/data/abc-order.xml";
+	public static final String EXAMPLE_KARAF_RUNTIME_PATH = "/data/abc-order.xml";
 	public static final String EXAMPLE_EAP_RUNTIME_PATH = "/bin/src/data/abc-order.xml";
 	public static final String EXAMPLE_XML_PATH = "resources/datatransformation/data/abc-order.xml";
 	public static final String EAP_CONSOLE_NAME = "Fuse on EAP";
