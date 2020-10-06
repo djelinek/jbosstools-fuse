@@ -210,7 +210,9 @@ public class SingleFuseProjectTest extends DefaultTest {
 			if (console.getConsoleText().contains("BUILD FAILURE") || console.getConsoleText().contains("[ERROR]")
 					|| console.consoleIsTerminated()) {
 				log.warn("There is a problem with building '" + name + "' project");
-				return false;
+				if(!console.getConsoleText().contains("[ERROR] WARNING:")) {
+					return false;
+				}
 			}
 		} catch (EclipseLayerException e) {
 			log.warn("There is no Camel Context file in '" + name + "' project");
