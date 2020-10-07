@@ -42,6 +42,7 @@ import org.eclipse.reddeer.requirements.cleanworkspace.CleanWorkspaceRequirement
 import org.eclipse.reddeer.workbench.impl.shell.WorkbenchShell;
 import org.eclipse.reddeer.workbench.ui.dialogs.WorkbenchPreferenceDialog;
 import org.jboss.tools.fuse.reddeer.ProjectType;
+import org.jboss.tools.fuse.reddeer.SupportedCamelVersions;
 import org.jboss.tools.fuse.reddeer.editor.CamelEditor;
 import org.jboss.tools.fuse.reddeer.preference.InstalledJREs;
 import org.jboss.tools.fuse.reddeer.preference.StagingRepositoriesPreferencePage;
@@ -123,7 +124,12 @@ public class SingleFuseProjectTest extends DefaultTest {
 		NewFuseIntegrationProjectWizardRuntimePage secondPage = new NewFuseIntegrationProjectWizardRuntimePage(wiz);
 		secondPage.setDeploymentType(deploymentType);
 		secondPage.setRuntimeType(runtimeType);
-		secondPage.typeCamelVersion(CAMEL_VERSION);
+		String camelVersion = SupportedCamelVersions.getCamelVersionsWithLabels().get(CAMEL_VERSION);
+		if(camelVersion != null) {
+			secondPage.selectCamelVersion(camelVersion);
+		} else {
+			secondPage.typeCamelVersion(CAMEL_VERSION);
+		}
 		wiz.next();
 		NewFuseIntegrationProjectWizardAdvancedPage lastPage = new NewFuseIntegrationProjectWizardAdvancedPage(wiz);
 		List<FuseProjectDefinition> projects = new ArrayList<>();
