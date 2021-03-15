@@ -12,6 +12,8 @@ package org.jboss.tools.fuse.reddeer.editor;
 
 import java.util.List;
 
+import org.eclipse.reddeer.common.wait.AbstractWait;
+import org.eclipse.reddeer.common.wait.TimePeriod;
 import org.eclipse.reddeer.jface.text.contentassist.ContentAssistant;
 import org.eclipse.reddeer.swt.impl.styledtext.DefaultStyledText;
 import org.eclipse.reddeer.workbench.impl.editor.DefaultEditor;
@@ -69,6 +71,7 @@ public class SourceEditor extends DefaultEditor {
 	 */
 	public List<String> getCompletionProposals() {
 		ContentAssistant assistant = openContentAssistant();
+		AbstractWait.sleep(TimePeriod.SHORT);
 		List<String> proposals = assistant.getProposals();
 		assistant.close();
 		return proposals;

@@ -18,6 +18,8 @@ import static org.hamcrest.CoreMatchers.equalTo;
 
 import java.util.List;
 
+import org.eclipse.reddeer.common.wait.AbstractWait;
+import org.eclipse.reddeer.common.wait.TimePeriod;
 import org.eclipse.reddeer.jface.text.contentassist.ContentAssistant;
 import org.eclipse.reddeer.junit.runner.RedDeerSuite;
 import org.eclipse.reddeer.requirements.cleanerrorlog.CleanErrorLogRequirement;
@@ -197,8 +199,10 @@ public class CamelLSPCompletionTest {
 	}
 
 	private void assertDuplicateOptionsFilltering(String proposal) {
+		AbstractWait.sleep(TimePeriod.MEDIUM);
 		collector.checkThat(proposal, editor.getCompletionProposals().contains(proposal), equalTo(true));
 		selectCompletionProposal(proposal);
+		AbstractWait.sleep(TimePeriod.MEDIUM);
 		collector.checkThat(proposal, editor.getCompletionProposals().contains(proposal), equalTo(false));
 	}
 
@@ -206,9 +210,11 @@ public class CamelLSPCompletionTest {
 		editor.insertText("?e");
 		editor.setCursorPosition(cursorPosition += 2);
 		assistant = editor.openContentAssistant();
+		AbstractWait.sleep(TimePeriod.MEDIUM);
 		collector.checkThat(assistant.getProposals().isEmpty(), equalTo(false));
 		assistant.chooseProposal("exchangePattern");
 		assistant = editor.openContentAssistant();
+		AbstractWait.sleep(TimePeriod.MEDIUM);
 		collector.checkThat(assistant.getProposals().isEmpty(), equalTo(false));
 		assistant.chooseProposal("InOnly");
 		editor.save();
