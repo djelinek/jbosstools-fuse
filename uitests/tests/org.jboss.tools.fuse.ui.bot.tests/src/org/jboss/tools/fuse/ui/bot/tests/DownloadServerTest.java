@@ -24,11 +24,13 @@ import org.eclipse.reddeer.swt.impl.button.PushButton;
 import org.eclipse.reddeer.swt.impl.button.RadioButton;
 import org.eclipse.reddeer.swt.impl.link.DefaultLink;
 import org.eclipse.reddeer.swt.impl.shell.DefaultShell;
+import org.eclipse.reddeer.swt.impl.table.DefaultTable;
 import org.eclipse.reddeer.swt.impl.text.LabeledText;
 import org.eclipse.reddeer.swt.impl.tree.DefaultTreeItem;
 import org.eclipse.reddeer.workbench.core.condition.JobIsRunning;
 import org.eclipse.reddeer.workbench.ui.dialogs.WorkbenchPreferenceDialog;
 import org.jboss.tools.fuse.reddeer.ResourceHelper;
+import org.jboss.tools.fuse.reddeer.condition.PushButtonIsAvailable;
 import org.jboss.tools.fuse.reddeer.preference.FuseServerRuntimePreferencePage;
 import org.jboss.tools.fuse.reddeer.utils.FuseServerManipulator;
 import org.junit.Test;
@@ -62,7 +64,7 @@ public class DownloadServerTest extends DefaultTest {
 	 * <b>Steps</b>
 	 * <ol>
 	 * <li>open Server Runtimes Preference page</li>
-	 * <li>select Karaf 3.0.3 runtime</li>
+	 * <li>select Karaf 3.0.x runtime</li>
 	 * <li>check download link</li>
 	 * <li>download the server runtime</li>
 	 * <li>check the server runtime</li>
@@ -86,10 +88,12 @@ public class DownloadServerTest extends DefaultTest {
 				break;
 			AbstractWait.sleep(TimePeriod.SHORT);
 		}
-		new DefaultLink(DOWNLOAD_LINK).click();
+		downloadLink.click();
 
 		new WaitUntil(new ShellIsAvailable(DOWNLOAD_TITLE));
 		new DefaultShell(DOWNLOAD_TITLE);
+
+		new DefaultTable().select(0); // Select first item from available servers
 
 		PushButton buttonNext = new PushButton(NEXT_BUTTON);
 		PushButton buttonBack = new PushButton(BACK_BUTTON);
@@ -120,9 +124,9 @@ public class DownloadServerTest extends DefaultTest {
 		new LabeledText(INSTALL_FOLDER).setText(ResourceHelper.getResourceAbsolutePath(Activator.PLUGIN_ID, "target"));
 		buttonFinish.click();
 
-		AbstractWait.sleep(TimePeriod.getCustom(2));
+		new WaitUntil(new PushButtonIsAvailable(FINISH_BUTTON), TimePeriod.getCustom(3600));
 		new WaitWhile(new JobIsRunning(), TimePeriod.getCustom(3600));
-		AbstractWait.sleep(TimePeriod.getCustom(2));
+
 		new PushButton(FINISH_BUTTON).click();
 		assertEquals(1, FuseServerManipulator.getServerRuntimes().size());
 	}
