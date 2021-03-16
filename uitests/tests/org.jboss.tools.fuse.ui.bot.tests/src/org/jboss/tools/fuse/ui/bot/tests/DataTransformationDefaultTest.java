@@ -23,6 +23,7 @@ import org.eclipse.reddeer.common.condition.WaitCondition;
 import org.eclipse.reddeer.common.wait.TimePeriod;
 import org.eclipse.reddeer.common.wait.WaitUntil;
 import org.eclipse.reddeer.common.wait.WaitWhile;
+import org.eclipse.reddeer.swt.condition.ShellIsActive;
 import org.eclipse.reddeer.swt.condition.ShellIsAvailable;
 import org.eclipse.reddeer.swt.impl.button.FinishButton;
 import org.eclipse.reddeer.swt.impl.button.OkButton;
@@ -222,8 +223,10 @@ public class DataTransformationDefaultTest extends DefaultTest {
 	protected void addDataTransformation() {
 		CamelEditor editor = new CamelEditor();
 		editor.addCamelComponent("Data Transformation", "SetHeader _setHeader1");
-		new WaitUntil(new ShellIsAvailable("New Fuse Transformation"), TimePeriod.VERY_LONG);
+		new WaitUntil(new ShellIsAvailable("New Fuse Transformation"), TimePeriod.getCustom(600));
+//		new WaitUntil(new ShellIsActive("New Fuse Transformation"), TimePeriod.getCustom(600));
 		NewFuseTransformationWizard wizard = new NewFuseTransformationWizard();
+		wizard.activate(TimePeriod.DEFAULT);
 		wizard.setTransformationID("xml2json");
 		wizard.setSourceType(TransformationType.XML);
 		wizard.setTargetType(TransformationType.JSON);
