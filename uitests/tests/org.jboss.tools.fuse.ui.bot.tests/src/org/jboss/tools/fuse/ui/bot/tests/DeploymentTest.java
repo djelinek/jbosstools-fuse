@@ -40,6 +40,7 @@ import org.eclipse.reddeer.requirements.openperspective.OpenPerspectiveRequireme
 import org.jboss.tools.fuse.reddeer.ProjectType;
 import org.jboss.tools.fuse.reddeer.ResourceHelper;
 import org.jboss.tools.fuse.reddeer.perspectives.FuseIntegrationPerspective;
+import org.jboss.tools.fuse.reddeer.projectexplorer.CamelProject;
 import org.jboss.tools.fuse.reddeer.requirement.FuseRequirement;
 import org.jboss.tools.fuse.reddeer.requirement.FuseRequirement.Fuse;
 import org.jboss.tools.fuse.reddeer.utils.FuseProjectDefinition;
@@ -178,6 +179,7 @@ public class DeploymentTest {
 		ProjectFactory.newProject(PROJECT_NAME).deploymentType(project.getDeploymentType())
 				.runtimeType(project.getRuntimeType()).version(project.getCamelVersion())
 				.template(project.getTemplate()).create();
+		new CamelProject(PROJECT_NAME).update();
 	}
 
 	@After
