@@ -28,6 +28,7 @@ import org.eclipse.reddeer.junit.requirement.inject.InjectRequirement;
 import org.eclipse.reddeer.junit.requirement.matcher.RequirementMatcher;
 import org.eclipse.reddeer.junit.runner.RedDeerSuite;
 import org.eclipse.reddeer.requirements.cleanworkspace.CleanWorkspaceRequirement.CleanWorkspace;
+import org.eclipse.reddeer.requirements.jre.JRERequirement.JRE;
 import org.eclipse.reddeer.requirements.openperspective.OpenPerspectiveRequirement.OpenPerspective;
 import org.eclipse.reddeer.workbench.handler.WorkbenchShellHandler;
 import org.eclipse.reddeer.workbench.impl.shell.WorkbenchShell;
@@ -36,6 +37,7 @@ import org.jboss.tools.fuse.reddeer.LogGrapper;
 import org.jboss.tools.fuse.reddeer.condition.FuseLogContainsText;
 import org.jboss.tools.fuse.reddeer.perspectives.FuseIntegrationPerspective;
 import org.jboss.tools.fuse.reddeer.preference.ConsolePreferencePage;
+import org.jboss.tools.fuse.reddeer.projectexplorer.CamelProject;
 import org.jboss.tools.fuse.reddeer.requirement.FuseRequirement;
 import org.jboss.tools.fuse.reddeer.requirement.FuseRequirement.Fuse;
 import org.jboss.tools.fuse.reddeer.runtime.ServerTypeMatcher;
@@ -58,6 +60,7 @@ import org.junit.runner.RunWith;
  * 
  * @author tsedmik
  */
+@JRE
 @CleanWorkspace
 @OpenPerspective(FuseIntegrationPerspective.class)
 @RunWith(RedDeerSuite.class)
@@ -106,6 +109,7 @@ public class JMXNavigatorServerTest {
 
 		ProjectFactory.newProject(PROJECT_NAME).deploymentType(STANDALONE).runtimeType(KARAF)
 				.version(serverReq.getConfiguration().getCamelVersion()).template(CBR_BLUEPRINT).create();
+		new CamelProject(PROJECT_NAME).update();
 		serverName = serverReq.getConfiguration().getServer().getName();
 		FuseServerManipulator.addModule(serverName, PROJECT_NAME);
 
