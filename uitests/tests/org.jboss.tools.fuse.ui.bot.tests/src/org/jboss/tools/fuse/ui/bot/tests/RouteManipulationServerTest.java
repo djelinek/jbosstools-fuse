@@ -27,6 +27,7 @@ import org.eclipse.reddeer.junit.requirement.matcher.RequirementMatcher;
 import org.eclipse.reddeer.junit.runner.RedDeerSuite;
 import org.eclipse.reddeer.requirements.cleanerrorlog.CleanErrorLogRequirement;
 import org.eclipse.reddeer.requirements.cleanworkspace.CleanWorkspaceRequirement.CleanWorkspace;
+import org.eclipse.reddeer.requirements.jre.JRERequirement.JRE;
 import org.eclipse.reddeer.requirements.openperspective.OpenPerspectiveRequirement.OpenPerspective;
 import org.eclipse.reddeer.requirements.server.ServerRequirementState;
 import org.eclipse.reddeer.swt.api.TreeItem;
@@ -62,6 +63,7 @@ import org.junit.runner.RunWith;
  * 
  * @author tsedmik
  */
+@JRE
 @Fuse(state = ServerRequirementState.RUNNING)
 @CleanWorkspace
 @OpenPerspective(FuseIntegrationPerspective.class)
