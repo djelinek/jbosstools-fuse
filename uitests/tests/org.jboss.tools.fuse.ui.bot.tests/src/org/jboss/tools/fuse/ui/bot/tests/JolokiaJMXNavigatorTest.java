@@ -55,7 +55,7 @@ public class JolokiaJMXNavigatorTest {
 
 	@RequirementRestriction
 	public static RequirementMatcher getRequirementMatcher() {
-		return new CamelExampleRequirementMatcher("camel-example-spring-boot", "2.20.1");
+		return new CamelExampleRequirementMatcher("camel-example-spring-boot", "2.23.4");
 	}
 	
 	/**
@@ -116,10 +116,10 @@ public class JolokiaJMXNavigatorTest {
 		log.info("Try to access route components via new Jolokia connection");
 		assertJMXNode("User-Defined Connections", connectionName, "MBeans", "java.util.logging", "Logging", "LoggerNames");
 		jmxView.collapseAll();
-		assertJMXNode("User-Defined Connections", connectionName, "Camel", "SampleCamel", "Endpoints", "stream", "out");
+		assertJMXNode("User-Defined Connections", connectionName, "Camel", "MyCamel", "Endpoints", "stream", "out");
 		jmxView.collapseAll();
-		assertJMXNode("User-Defined Connections", connectionName, "Camel", "SampleCamel", "Routes", "route1",
-						"timer:hello?period={{timer.period}}", "Transform transform1", "stream:out");
+		assertJMXNode("User-Defined Connections", connectionName, "Camel", "MyCamel", "Routes", "hello",
+						"timer:hello?period={{timer.period}}", "Transform transform1", "Filter filter1", "stream:out");
 		jmxView.collapseAll();
 		assertTrue("There are some errors in Error Log", LogGrapper.getPluginErrors("fuse").size() == 0);
 	}

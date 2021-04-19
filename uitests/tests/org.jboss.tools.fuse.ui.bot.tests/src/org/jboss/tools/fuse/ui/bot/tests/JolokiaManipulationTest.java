@@ -95,7 +95,7 @@ public class JolokiaManipulationTest {
 
 	@RequirementRestriction
 	public static RequirementMatcher getRequirementMatcher() {
-		return new CamelExampleRequirementMatcher("camel-example-spring-boot", "2.20.1");
+		return new CamelExampleRequirementMatcher("camel-example-spring-boot", "2.23.4");
 	}
 
 	@BeforeClass
@@ -148,7 +148,7 @@ public class JolokiaManipulationTest {
 		activateRouteEditing();
 
 		// Activate editor and edit route
-		CamelEditor editor = new CamelEditor("<connected>Remote CamelContext: SampleCamel");
+		CamelEditor editor = new CamelEditor("<connected>Remote CamelContext: MyCamel");
 		editor.activate();
 		editor.clickOnEditPart("timer:hello?period={{timer.period}}");
 		propertiesView.open();
@@ -197,7 +197,7 @@ public class JolokiaManipulationTest {
 	@Test
 	public void testTracingRoute() {
 
-		TreeItem item = jmxView.getNode("User-Defined Connections", conf.getName(), "Camel", "SampleCamel");
+		TreeItem item = jmxView.getNode("User-Defined Connections", conf.getName(), "Camel", "MyCamel");
 		item.select();
 		new ContextMenuItem(item, "Start Tracing").select();
 		AbstractWait.sleep(TimePeriod.MEDIUM);
@@ -237,7 +237,7 @@ public class JolokiaManipulationTest {
 		activateRouteEditing();
 
 		// Activate editor and set breakpoint
-		CamelEditor editor = new CamelEditor("<connected>Remote CamelContext: SampleCamel");
+		CamelEditor editor = new CamelEditor("<connected>Remote CamelContext: MyCamel");
 		editor.activate();
 		editor.setBreakpoint("Transform transform1");
 
@@ -314,7 +314,7 @@ public class JolokiaManipulationTest {
 	 * Select running route
 	 */
 	private void activateRouteEditing() {
-		TreeItem item = jmxView.getNode("User-Defined Connections", conf.getName(), "Camel", "SampleCamel");
+		TreeItem item = jmxView.getNode("User-Defined Connections", conf.getName(), "Camel", "MyCamel");
 		item.select();
 		new ContextMenuItem(item, "Edit Routes").select();
 		WaitCondition saveCondition = new ShellIsAvailable("Save Resource");
