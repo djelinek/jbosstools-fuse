@@ -19,27 +19,38 @@ import java.io.IOException;
 import java.nio.file.Files;
 
 import org.eclipse.reddeer.common.matcher.RegexMatcher;
-import org.eclipse.reddeer.common.wait.AbstractWait;
 import org.eclipse.reddeer.common.wait.TimePeriod;
 import org.eclipse.reddeer.common.wait.WaitUntil;
+import org.eclipse.reddeer.common.wait.WaitWhile;
+import org.eclipse.reddeer.core.exception.CoreLayerException;
 import org.eclipse.reddeer.direct.project.Project;
 import org.eclipse.reddeer.eclipse.condition.ConsoleHasText;
+import org.eclipse.reddeer.eclipse.condition.LaunchIsSuspended;
+import org.eclipse.reddeer.eclipse.debug.ui.views.launch.TerminateButton;
 import org.eclipse.reddeer.eclipse.ui.console.ConsoleView;
+import org.eclipse.reddeer.eclipse.ui.views.log.LogView;
 import org.eclipse.reddeer.junit.runner.RedDeerSuite;
+import org.eclipse.reddeer.requirements.cleanerrorlog.CleanErrorLogRequirement.CleanErrorLog;
 import org.eclipse.reddeer.requirements.cleanworkspace.CleanWorkspaceRequirement;
+import org.eclipse.reddeer.requirements.cleanworkspace.CleanWorkspaceRequirement.CleanWorkspace;
 import org.eclipse.reddeer.swt.api.TreeItem;
 import org.eclipse.reddeer.swt.condition.ShellIsAvailable;
 import org.eclipse.reddeer.swt.impl.button.PushButton;
 import org.eclipse.reddeer.swt.impl.menu.ContextMenu;
-import org.eclipse.reddeer.swt.impl.shell.DefaultShell;
+import org.eclipse.reddeer.swt.impl.menu.ContextMenuItem;
+import org.eclipse.reddeer.workbench.core.condition.JobIsRunning;
+import org.eclipse.reddeer.workbench.handler.WorkbenchShellHandler;
 import org.eclipse.reddeer.workbench.impl.editor.DefaultEditor;
+import org.eclipse.reddeer.workbench.impl.shell.WorkbenchShell;
 import org.jboss.tools.fuse.reddeer.ProjectTemplate;
 import org.jboss.tools.fuse.reddeer.debug.StepOverButton;
 import org.jboss.tools.fuse.reddeer.editor.CamelEditor;
+import org.jboss.tools.fuse.reddeer.preference.ConsolePreferenceUtil;
 import org.jboss.tools.fuse.reddeer.projectexplorer.CamelProject;
 import org.jboss.tools.fuse.reddeer.utils.LogChecker;
 import org.jboss.tools.fuse.reddeer.utils.ProjectFactory;
 import org.jboss.tools.fuse.reddeer.view.FuseJMXNavigator;
+import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -48,6 +59,8 @@ import org.junit.runner.RunWith;
 /**
  * @author fpospisi
  */
+@CleanWorkspace
+@CleanErrorLog
 @RunWith(RedDeerSuite.class)
 public class EditRoutesDebuggingTest {
 	
@@ -58,12 +71,37 @@ public class EditRoutesDebuggingTest {
 	 */
 	@BeforeClass
 	public static void setWorkspace() {
+		new WorkbenchShell().maximize();
+		ConsolePreferenceUtil.setConsoleOpenOnError(false);
+		ConsolePreferenceUtil.setConsoleOpenOnOutput(false);
+		new LogView().open();
+		new LogView().setActivateOnNewEvents(false);
+
 		ProjectFactory.newProject(PROJECT_NAME).deploymentType(STANDALONE).runtimeType(KARAF)
 				.template(ProjectTemplate.CBR_BLUEPRINT).create();
+		new CamelProject(PROJECT_NAME).update();
 	}
 	
+//	@After
+//	public void setupCleanup() {
+//		ConsoleView console = new ConsoleView();
+//		console.open();
+//		try {
+//			console.terminateConsole();
+//			new WaitWhile(new JobIsRunning(), TimePeriod.VERY_LONG);
+//		} catch (CoreLayerException ex) {
+//		}
+//
+//		try {
+//			new DefaultEditor(new RegexMatcher("<connected>Remote CamelContext:.*")).close();
+//		} catch (Exception e) {
+//			// editor is not opened --> ok
+//		}
+//	}
+
 	@AfterClass
 	public static void cleanWorkspace() {
+		WorkbenchShellHandler.getInstance().closeAllNonWorbenchShells();
 		new CleanWorkspaceRequirement().fulfill();
 	}
 	
@@ -88,6 +126,7 @@ public class EditRoutesDebuggingTest {
 	 */
 	@Test
 	public void testRouteContextSupport() throws IOException {
+
 		/*
 		 * Run as Local Camel Context.
 		 */
@@ -99,17 +138,19 @@ public class EditRoutesDebuggingTest {
 		 * Connect to Maven.
 		 */
 		FuseJMXNavigator nav = new FuseJMXNavigator();
-		nav.connectTo("Local Processes", "maven");
+		nav.refreshLocalProcesses();
+		nav.getNode("Local Processes", "Local Camel Context", "Camel");
 	
-		
 		/*
 		 * Open Routes with Edit Routes.
 		 */
-		nav.refreshLocalProcesses();	
-		TreeItem jmxNode = nav.getNode("Local Processes", "maven", "Camel", "cbr-example-context", "Routes");
+		TreeItem jmxNode = nav.getNode("Local Processes", "Local Camel Context", "Camel", "cbr-example-context");
 		jmxNode.select();
 		new ContextMenu(jmxNode).getItem("Edit Routes").select();
-		new WaitUntil(new ConsoleHasText("Enabling debugger"), TimePeriod.DEFAULT);
+
+//		nav.getNode("Local Processes", "Local Camel Context", "Camel", "cbr-example-context").select();
+//		new ContextMenuItem("Edit Routes").select();
+//		new WaitUntil(new ConsoleHasText("Enabling debugger"), TimePeriod.LONG);
 
 		/*
 		 * Open in editor and check for correct open.
@@ -121,7 +162,7 @@ public class EditRoutesDebuggingTest {
 		 * Set breakpoint and change message of Log _log1.  
 		 */
 		editor.setBreakpoint("Log _log1");	
-		new WaitUntil(new ConsoleHasText("Adding breakpoint _log1"), TimePeriod.DEFAULT);
+		new WaitUntil(new ConsoleHasText("Adding breakpoint _log1"), TimePeriod.VERY_LONG);
 		editor.selectEditPart("Route cbr-route"); 
 		editor.selectEditPart("Log _log1");
 		editor.setProperty("Message *", "AAA-BBB-CCC");
@@ -137,7 +178,7 @@ public class EditRoutesDebuggingTest {
 		/*
 		 * Switch to Debug perspective.
 		 */
-		new WaitUntil(new ShellIsAvailable("Confirm Perspective Switch"), TimePeriod.DEFAULT);
+		new WaitUntil(new ShellIsAvailable("Confirm Perspective Switch"), TimePeriod.VERY_LONG);
 		new PushButton("Switch").click();
 	
 		/*
@@ -145,8 +186,10 @@ public class EditRoutesDebuggingTest {
 		 * Check for changed log message.
 		 * Check for correct processing of order1.xml.
 		 */
+		new WaitUntil(new LaunchIsSuspended(), TimePeriod.VERY_LONG);
 		new StepOverButton().select();		
-		new WaitUntil(new ConsoleHasText("AAA-BBB-CCC"), TimePeriod.DEFAULT);
+		new WaitUntil(new ConsoleHasText("AAA-BBB-CCC"), TimePeriod.VERY_LONG);
+
 
 		/*
 		 * Check for Fuse related errors.

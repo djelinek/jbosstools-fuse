@@ -107,7 +107,8 @@ public class CamelProject {
 		}
 		AbstractWait.sleep(TimePeriod.DEFAULT);
 		try {
-			new WaitUntil(new ConsoleHasText("started and consuming from"), TimePeriod.getCustom(1200));
+			new WaitUntil(new ConsoleHasText("Starting Camel ..."), TimePeriod.getCustom(1200));
+			new WaitUntil(new ConsoleHasText("started and consuming from"), TimePeriod.VERY_LONG);
 		} catch(WaitTimeoutExpiredException ex) {
 			backupHsErrPidLogs();
 			throw ex;
