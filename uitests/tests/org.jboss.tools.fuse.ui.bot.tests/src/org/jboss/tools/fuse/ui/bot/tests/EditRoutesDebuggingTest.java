@@ -91,8 +91,7 @@ public class EditRoutesDebuggingTest {
 		/*
 		 * Run as Local Camel Context.
 		 */
-		CamelProject project = new CamelProject(PROJECT_NAME);
-		project.runCamelContext();		
+		new CamelProject(PROJECT_NAME).runCamelContext();		
 		assertTrue("Route cbr-route was not property started.",
 				new ConsoleView().getConsoleText().contains("cbr-route started and consuming"));
 		
@@ -110,19 +109,19 @@ public class EditRoutesDebuggingTest {
 		TreeItem jmxNode = nav.getNode("Local Processes", "maven", "Camel", "cbr-example-context", "Routes");
 		jmxNode.select();
 		new ContextMenu(jmxNode).getItem("Edit Routes").select();
-		assertTrue(new ConsoleHasText("Enabling debugger").test());
+		new WaitUntil(new ConsoleHasText("Enabling debugger"), TimePeriod.DEFAULT);
 
 		/*
 		 * Open in editor and check for correct open.
 		 */
 		CamelEditor editor = new CamelEditor(new DefaultEditor(new RegexMatcher("<connected>Remote CamelContext:.*")).getTitle());
-		assertTrue(editor.isComponentAvailable("Log _log1"));
+		assertTrue("Component Log _log1 not found.", editor.isComponentAvailable("Log _log1"));
 		
 		/*
 		 * Set breakpoint and change message of Log _log1.  
 		 */
 		editor.setBreakpoint("Log _log1");	
-		assertTrue(new ConsoleHasText("Adding breakpoint _log1").test());
+		new WaitUntil(new ConsoleHasText("Adding breakpoint _log1"), TimePeriod.DEFAULT);
 		editor.selectEditPart("Route cbr-route"); 
 		editor.selectEditPart("Log _log1");
 		editor.setProperty("Message *", "AAA-BBB-CCC");
@@ -139,7 +138,6 @@ public class EditRoutesDebuggingTest {
 		 * Switch to Debug perspective.
 		 */
 		new WaitUntil(new ShellIsAvailable("Confirm Perspective Switch"), TimePeriod.DEFAULT);
-		new DefaultShell("Confirm Perspective Switch");
 		new PushButton("Switch").click();
 	
 		/*
@@ -148,7 +146,7 @@ public class EditRoutesDebuggingTest {
 		 * Check for correct processing of order1.xml.
 		 */
 		new StepOverButton().select();		
-		assertTrue(new ConsoleHasText("AAA-BBB-CCC").test());
+		new WaitUntil(new ConsoleHasText("AAA-BBB-CCC"), TimePeriod.DEFAULT);
 
 		/*
 		 * Check for Fuse related errors.
