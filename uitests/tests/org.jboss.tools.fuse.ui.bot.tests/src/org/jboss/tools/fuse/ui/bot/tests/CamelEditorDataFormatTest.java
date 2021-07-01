@@ -134,7 +134,10 @@ public class CamelEditorDataFormatTest {
 		camelDataFormats.add("univocity-tsv");
 		camelDataFormats.add("xmlBeans");
 		camelDataFormats.add("xmljson");
-		camelDataFormats.add("xmlrpc");
+		// checking if Camel version is Fuse 7.8 --> if yes, skip 'xmlrpc' which is no more available in this version
+		if(!camelCatalogRequirement.getConfiguration().getVersion().contains("78")) {
+			camelDataFormats.add("xmlrpc");
+		}
 		camelDataFormats.add("xstream");
 		camelDataFormats.add("zip");
 		camelDataFormats.add("zipFile");
