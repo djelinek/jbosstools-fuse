@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017 Red Hat, Inc. 
+ * Copyright (c) 2021 Red Hat, Inc. 
  * Distributed under license by Red Hat, Inc. All rights reserved. 
  * This program is made available under the terms of the 
  * Eclipse Public License v1.0 which accompanies this distribution, 
@@ -11,19 +11,23 @@
 package org.jboss.tools.fuse.ui.bot.tests;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+
+import java.util.Arrays;
+import java.util.Collection;
 
 import org.eclipse.reddeer.common.wait.AbstractWait;
 import org.eclipse.reddeer.common.wait.TimePeriod;
 import org.eclipse.reddeer.common.wait.WaitUntil;
 import org.eclipse.reddeer.common.wait.WaitWhile;
+import org.eclipse.reddeer.junit.internal.runner.ParameterizedRequirementsRunnerFactory;
 import org.eclipse.reddeer.junit.runner.RedDeerSuite;
 import org.eclipse.reddeer.swt.condition.ShellIsAvailable;
 import org.eclipse.reddeer.swt.impl.button.PushButton;
 import org.eclipse.reddeer.swt.impl.button.RadioButton;
 import org.eclipse.reddeer.swt.impl.link.DefaultLink;
 import org.eclipse.reddeer.swt.impl.shell.DefaultShell;
+import org.eclipse.reddeer.swt.impl.table.DefaultTable;
 import org.eclipse.reddeer.swt.impl.text.LabeledText;
 import org.eclipse.reddeer.swt.impl.tree.DefaultTreeItem;
 import org.eclipse.reddeer.workbench.core.condition.JobIsRunning;
@@ -31,15 +35,19 @@ import org.eclipse.reddeer.workbench.ui.dialogs.WorkbenchPreferenceDialog;
 import org.jboss.tools.fuse.reddeer.ResourceHelper;
 import org.jboss.tools.fuse.reddeer.preference.FuseServerRuntimePreferencePage;
 import org.jboss.tools.fuse.reddeer.utils.FuseServerManipulator;
+import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized.Parameter;
+import org.junit.runners.Parameterized.Parameters;
+import org.junit.runners.Parameterized.UseParametersRunnerFactory;
 
 /**
- * Tests a download server runtime feature
  * 
- * @author tsedmik
+ * @author tsedmik, fpospisi
  */
 @RunWith(RedDeerSuite.class)
+@UseParametersRunnerFactory(ParameterizedRequirementsRunnerFactory.class)
 public class DownloadServerTest extends DefaultTest {
 
 	public static final String ADD_BUTTON = "Add...";
@@ -47,13 +55,50 @@ public class DownloadServerTest extends DefaultTest {
 	public static final String BACK_BUTTON = "< Back";
 	public static final String CANCEL_BUTTON = "Cancel";
 	public static final String FINISH_BUTTON = "Finish";
+	public static final String REMOVE_BUTTON = "Remove";
 	public static final String NEW_WINDOW = "New Server Runtime Environment";
-	public static final String SERVER_SECTION = "Apache";
-	public static final String SERVER_TYPE = "Karaf 3.0";
 	public static final String DOWNLOAD_LINK = "Download and install runtime...";
 	public static final String DOWNLOAD_FOLDER = "Download folder:";
 	public static final String DOWNLOAD_TITLE = "Download Runtimes";
 	public static final String INSTALL_FOLDER = "Install folder:";
+
+	public static final String USERNAME = "foo";
+	public static final String PASSWORD = "fighters";
+
+	@Parameter
+	public String parSection;
+
+	@Parameter(1)
+	public String parType;
+
+	@Parameter(2)
+	public boolean parLoginRequired;
+
+	@Parameters(name = "{0}")
+	public static Collection<Object[]> data() {
+		return Arrays.asList(new Object[][] {
+			// Karaf
+			{ "Apache", "Karaf 3.0", false },
+			// Fuse on Karaf
+			{ "Red Hat JBoss Middleware", "Red Hat Fuse 7+", true },
+			{ "JBoss Community", "JBoss 6.x Runtime", false },
+			// Fuse on EAP
+			{ "Red Hat JBoss Middleware", "Red Hat JBoss Enterprise Application Platform 7.3 Runtime", true }, });
+	}
+
+	/*
+	 * Remove downloaded Runtime.
+	 */
+	@After
+	public void cleanWorkspace() {
+		WorkbenchPreferenceDialog dialog = new WorkbenchPreferenceDialog();
+		FuseServerRuntimePreferencePage serverRuntime = new FuseServerRuntimePreferencePage(dialog);
+		dialog.open();
+		dialog.select(serverRuntime);
+		DefaultTable selection = new DefaultTable();
+		selection.select((selection.rowCount() - 1));
+		new PushButton(REMOVE_BUTTON).click();
+	}
 
 	/**
 	 * <p>
@@ -62,7 +107,7 @@ public class DownloadServerTest extends DefaultTest {
 	 * <b>Steps</b>
 	 * <ol>
 	 * <li>open Server Runtimes Preference page</li>
-	 * <li>select Karaf 3.0.3 runtime</li>
+	 * <li>select server from parameter</li>
 	 * <li>check download link</li>
 	 * <li>download the server runtime</li>
 	 * <li>check the server runtime</li>
@@ -71,15 +116,25 @@ public class DownloadServerTest extends DefaultTest {
 	@Test
 	public void testDownloadServerRuntimeTest() {
 
+		/*
+		 * Open Server Runtime Environments.
+		 */
 		WorkbenchPreferenceDialog dialog = new WorkbenchPreferenceDialog();
 		FuseServerRuntimePreferencePage serverRuntime = new FuseServerRuntimePreferencePage(dialog);
 		dialog.open();
 		dialog.select(serverRuntime);
+
+		/*
+		 * Add new Server Runtime Environment.
+		 */
 		new PushButton(ADD_BUTTON).click();
 		new DefaultShell(NEW_WINDOW).setFocus();
-		new DefaultTreeItem(SERVER_SECTION, SERVER_TYPE).select();
+		new DefaultTreeItem(parSection, parType).select();
 		new PushButton(NEXT_BUTTON).click();
 
+		/*
+		 * Open list of available versions.
+		 */
 		DefaultLink downloadLink = new DefaultLink(DOWNLOAD_LINK);
 		for (int i = 0; i < 10; i++) {
 			if (downloadLink.isEnabled())
@@ -87,37 +142,56 @@ public class DownloadServerTest extends DefaultTest {
 			AbstractWait.sleep(TimePeriod.SHORT);
 		}
 		new DefaultLink(DOWNLOAD_LINK).click();
-
 		new WaitUntil(new ShellIsAvailable(DOWNLOAD_TITLE));
 		new DefaultShell(DOWNLOAD_TITLE);
 
+		/*
+		 * Select latest available.
+		 */
+		DefaultTable selection = new DefaultTable();
+		selection.select((selection.rowCount() - 1));
 		PushButton buttonNext = new PushButton(NEXT_BUTTON);
-		PushButton buttonBack = new PushButton(BACK_BUTTON);
-		PushButton buttonCancel = new PushButton(CANCEL_BUTTON);
-		PushButton buttonFinish = new PushButton(FINISH_BUTTON);
-
 		assertTrue(buttonNext.isEnabled());
-		assertFalse(buttonBack.isEnabled());
-		assertFalse(buttonFinish.isEnabled());
-		assertTrue(buttonCancel.isEnabled());
-
 		buttonNext.click();
 
-		assertFalse(buttonNext.isEnabled());
-		assertTrue(buttonBack.isEnabled());
-		assertFalse(buttonFinish.isEnabled());
-		assertTrue(buttonCancel.isEnabled());
+		/*
+		 * Handle login, if neccesary.
+		 */
+		if (parLoginRequired) {
+			PushButton buttonAdd = new PushButton(ADD_BUTTON);
+			buttonAdd.click();
+			new LabeledText("Username:").setText(USERNAME);
+			new LabeledText("Password:").setText(PASSWORD);
+			PushButton buttonOk = new PushButton("OK");
 
+			/*
+			 * If login is already in list.
+			 */
+			if (buttonOk.isEnabled()) {
+				buttonOk.click();
+			} else {
+				new PushButton(CANCEL_BUTTON).click();
+			}
+
+			assertTrue(buttonNext.isEnabled());
+			buttonNext.click();
+		}
+
+		/*
+		 * Accept licence agreement.
+		 */
+		AbstractWait.sleep(TimePeriod.getCustom(2));
 		new RadioButton(0).toggle(true);
-
 		assertTrue(buttonNext.isEnabled());
-		assertTrue(buttonBack.isEnabled());
-		assertFalse(buttonFinish.isEnabled());
-		assertTrue(buttonCancel.isEnabled());
-
 		buttonNext.click();
+
+		/*
+		 * Handle download and check runtime.
+		 */
 		new LabeledText(DOWNLOAD_FOLDER).setText(ResourceHelper.getResourceAbsolutePath(Activator.PLUGIN_ID, "target"));
 		new LabeledText(INSTALL_FOLDER).setText(ResourceHelper.getResourceAbsolutePath(Activator.PLUGIN_ID, "target"));
+
+		PushButton buttonFinish = new PushButton(FINISH_BUTTON);
 		buttonFinish.click();
 
 		AbstractWait.sleep(TimePeriod.getCustom(2));
